@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using Geta.Optimizely.GoogleProductFeed.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Geta.Optimizely.GoogleProductFeed.Repositories
 {
