@@ -5,6 +5,7 @@ using System;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Geta.Optimizely.GoogleProductFeed.Configuration
 {
@@ -16,8 +17,11 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
         {
             services.AddTransient<IFeedHelper, FeedHelper>();
             services.AddTransient<IFeedRepository, FeedRepository>();
-            services.AddTransient<FeedApplicationDbContext>();
+            services.AddTransient(provider =>
+                new FeedApplicationDbContext(provider.GetRequiredService<IOptions<GoogleProductFeedOptions>>()));
             services.AddTransient<FeedBuilderCreateJob>();
+
+            services.AddHostedService<MigrationService>();
 
             services.AddOptions<GoogleProductFeedOptions>().Configure<IConfiguration>((options, configuration) =>
             {
