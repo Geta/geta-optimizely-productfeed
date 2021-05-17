@@ -17,6 +17,10 @@ namespace Geta.Optimizely.GoogleProductFeed.Repositories
             _connectionString = options.Value.ConnectionString;
         }
 
+        public FeedApplicationDbContext(DbContextOptions options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             if (options.IsConfigured) return;
