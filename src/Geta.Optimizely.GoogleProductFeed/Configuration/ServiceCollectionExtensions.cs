@@ -15,6 +15,9 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
             this IServiceCollection services,
             Action<GoogleProductFeedOptions> setupAction)
         {
+            services.AddControllers()
+                .AddXmlSerializerFormatters();
+
             services.AddTransient<IFeedHelper, FeedHelper>();
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient(provider =>

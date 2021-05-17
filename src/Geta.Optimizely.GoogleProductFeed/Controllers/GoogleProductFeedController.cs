@@ -2,10 +2,8 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Geta.Optimizely.GoogleProductFeed.Models;
-using J2N.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Geta.Optimizely.GoogleProductFeed.Controllers
