@@ -4,6 +4,7 @@
 using Geta.Optimizely.GoogleProductFeed.Configuration;
 using Geta.Optimizely.GoogleProductFeed.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Geta.Optimizely.GoogleProductFeed.Repositories
 {
@@ -11,9 +12,9 @@ namespace Geta.Optimizely.GoogleProductFeed.Repositories
     {
         private readonly string _connectionString;
 
-        public FeedApplicationDbContext(DbSettings settings)
+        public FeedApplicationDbContext(IOptions<GoogleProductFeedOptions> options)
         {
-            _connectionString = settings.ConnectionString;
+            _connectionString = options.Value.ConnectionString;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

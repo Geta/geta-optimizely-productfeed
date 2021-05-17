@@ -5,6 +5,6 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
 {
     public class GoogleProductFeedOptions
     {
-        public DbSettings DbSettings { get; } = new DbSettings();
+        public string ConnectionString { get; set; }
     }
 }

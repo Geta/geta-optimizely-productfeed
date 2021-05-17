@@ -27,6 +27,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
+using Geta.Optimizely.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed.Configuration;
 
 namespace EPiServer.Reference.Commerce.Site
@@ -117,8 +119,10 @@ namespace EPiServer.Reference.Commerce.Site
 
             services.AddGoogleProductFeed(x =>
                 {
-                    x.DbSettings.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
                 });
+
+            services.AddTransient<FeedBuilder, EpiBaseImplementation>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
