@@ -10,11 +10,6 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddGoogleProductFeed(this IServiceCollection services)
-        {
-            return AddGoogleProductFeed(services, o => { });
-        }
-
         public static IServiceCollection AddGoogleProductFeed(
             this IServiceCollection services,
             Action<GoogleProductFeedOptions> setupAction)
@@ -22,6 +17,7 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
             services.AddTransient<IFeedHelper, FeedHelper>();
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient<FeedApplicationDbContext>();
+            services.AddTransient<FeedBuilderCreateJob>();
 
             services.AddOptions<GoogleProductFeedOptions>().Configure<IConfiguration>((options, configuration) =>
             {
