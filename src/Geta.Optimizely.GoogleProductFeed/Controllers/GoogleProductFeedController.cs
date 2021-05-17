@@ -3,11 +3,16 @@
 
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
+using Geta.Optimizely.GoogleProductFeed.Models;
+using J2N.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Geta.Optimizely.GoogleProductFeed.Controllers
 {
-    public class GoogleProductFeedController : Controller
+    [ApiController]
+    [Produces("application/xml")]
+    public class GoogleProductFeedController : ControllerBase
     {
         private readonly IFeedHelper _feedHelper;
 
@@ -17,19 +22,21 @@ namespace Geta.Optimizely.GoogleProductFeed.Controllers
         }
 
         [Route("googleproductfeed")]
-        public IHttpActionResult Get()
+        public async Task<ActionResult<Feed>> Get()
         {
-            var siteHost = HttpContext.Current.Request.Url.Host;
+            var siteHost = HttpContext.Request.Host.ToString();
             var feed = _feedHelper.GetLatestFeed(siteHost);
 
             if (feed == null)
             {
-                return Content(HttpStatusCode.NotFound, "No feed generated", new NamespacedXmlMediaTypeFormatter());
+                return NotFound("No feed generated");
+                // return Content(HttpStatusCode.NotFound, "No feed generated", new NamespacedXmlMediaTypeFormatter());
             }
 
-            feed.Entries = feed.Entries.Where(e => e.Link.Contains(Request.RequestUri.Host)).ToList();
+            feed.Entries = feed.Entries.Where(e => e.Link.Contains(siteHost)).ToList();
 
-            return Content(HttpStatusCode.OK, feed, new NamespacedXmlMediaTypeFormatter());
+            return feed;
+            // return Content(HttpStatusCode.OK, feed, new NamespacedXmlMediaTypeFormatter());
         }
     }
 }

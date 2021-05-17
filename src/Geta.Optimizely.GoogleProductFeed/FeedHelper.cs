@@ -4,13 +4,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using EPiServer.ServiceLocation;
 using Geta.Optimizely.GoogleProductFeed.Models;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 
 namespace Geta.Optimizely.GoogleProductFeed
 {
-    [ServiceConfiguration(typeof(IFeedHelper))]
     public class FeedHelper : IFeedHelper
     {
         private const string Ns = "http://www.w3.org/2005/Atom";

@@ -3,12 +3,10 @@
 
 using System;
 using System.Linq;
-using EPiServer.ServiceLocation;
 using Geta.Optimizely.GoogleProductFeed.Models;
 
 namespace Geta.Optimizely.GoogleProductFeed.Repositories
 {
-    [ServiceConfiguration(typeof(IFeedRepository))]
     public class FeedRepository : IFeedRepository
     {
         private readonly FeedApplicationDbContext _applicationDbContext;
