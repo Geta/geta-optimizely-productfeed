@@ -2,11 +2,14 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Geta.Optimizely.GoogleProductFeed.Infrastructure;
 using Geta.Optimizely.GoogleProductFeed.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Geta.Optimizely.GoogleProductFeed.Controllers
+namespace Geta.Optimizely.GoogleProductFeed
 {
     [ApiController]
     [Produces("application/xml")]
@@ -20,21 +23,24 @@ namespace Geta.Optimizely.GoogleProductFeed.Controllers
         }
 
         [Route("googleproductfeed")]
-        public async Task<ActionResult<Feed>> Get()
+        public async Task<IActionResult> Get()
         {
             var siteHost = HttpContext.Request.Host.ToString();
             var feed = _feedHelper.GetLatestFeed(siteHost);
 
             if (feed == null)
             {
-                return NotFound("No feed generated");
-                // return Content(HttpStatusCode.NotFound, "No feed generated", new NamespacedXmlMediaTypeFormatter());
+                return new ContentResult()
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Content = ObjectXmlSerializer.Serialize("No feed generated", typeof(string)),
+                    ContentType = "application/xml"
+                };
             }
 
             feed.Entries = feed.Entries.Where(e => e.Link.Contains(siteHost)).ToList();
 
-            return feed;
-            // return Content(HttpStatusCode.OK, feed, new NamespacedXmlMediaTypeFormatter());
+            return Content(ObjectXmlSerializer.Serialize(feed, typeof(Feed)), "application/xml", Encoding.UTF8);
         }
     }
 }
