@@ -1,4 +1,4 @@
-# Geta Google Product Feed
+# Geta Optimizely Google Product Feed
 
 ![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_GetaGoogleProductFeed_00ci),branch:master/statusIcon)
 [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
