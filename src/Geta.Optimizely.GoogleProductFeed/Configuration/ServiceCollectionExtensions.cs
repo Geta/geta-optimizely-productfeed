@@ -12,6 +12,12 @@ namespace Geta.Optimizely.GoogleProductFeed.Configuration
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddGoogleProductFeed(
+            this IServiceCollection services)
+        {
+            return services.AddGoogleProductFeed(_ => { });
+        }
+
+        public static IServiceCollection AddGoogleProductFeed(
             this IServiceCollection services,
             Action<GoogleProductFeedOptions> setupAction)
         {
