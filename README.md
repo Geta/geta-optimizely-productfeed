@@ -1,6 +1,6 @@
 # Geta Optimizely Google Product Feed
 
-![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_GetaGoogleProductFeed_00ci),branch:master/statusIcon)
+![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_OptimizelyGoogleProductFeed_00ci),branch:master/statusIcon)
 [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
 [![Platform](https://img.shields.io/badge/Episerver-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
 [![Platform](https://img.shields.io/badge/Episerver%20Commerce-14-orange.svg?style=flat)](http://world.episerver.com/commerce/)
