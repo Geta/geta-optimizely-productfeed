@@ -16,7 +16,7 @@
     <Description>Creates a Google Product Feed based on the Atom specification for Optimizely Commerce.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-optimizely-googleproductfeed/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>Optimizely Episerver Commerce Google Product Feed</PackageTags>
-    <RepositoryUrl>https://github.com/Geta/geta-optimizely-googleproductfeed</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Geta/geta-optimizely-googleproductfeed.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
