@@ -27,6 +27,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using EPiServer.Cms.TinyMce;
 using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed.Configuration;

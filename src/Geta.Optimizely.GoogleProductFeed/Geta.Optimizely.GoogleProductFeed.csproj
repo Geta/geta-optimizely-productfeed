@@ -24,13 +24,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.Commerce.Core" Version="14.0.0-inte-020659" />
+    <PackageReference Include="EPiServer.Commerce.Core" Version="14.0.0-pre-021056" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\images\icon.png">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+      <Link>icon.png</Link>
+    </None>
   </ItemGroup>
 
 </Project>
