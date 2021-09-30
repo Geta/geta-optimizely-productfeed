@@ -10,11 +10,11 @@ using EPiServer.Reference.Commerce.Site.Features.Market.Services;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using Mediachase.Commerce;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Linq;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EPiServer.Reference.Commerce.Site.Infrastructure
 {

@@ -1,6 +1,5 @@
 using EPiServer.Cms.UI.AspNetIdentity;
 using EPiServer.Data;
-using EPiServer.DependencyInjection;
 using EPiServer.Framework.Web.Resources;
 using EPiServer.Personalization.Commerce.Tracking;
 using EPiServer.Reference.Commerce.Site.Features.Market.Services;
@@ -27,10 +26,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
-using EPiServer.Cms.TinyMce;
-using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed.Configuration;
+using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 
 namespace EPiServer.Reference.Commerce.Site
 {
@@ -86,8 +84,6 @@ namespace EPiServer.Reference.Commerce.Site
 
             //Commerce
             services.AddCommerce();
-            services.AddTinyMce();
-
             //site specific
             services.Configure<IISServerOptions>(options => options.AllowSynchronousIO = true);
             services.Configure<KestrelServerOptions>(options => options.AllowSynchronousIO = true);
@@ -119,9 +115,9 @@ namespace EPiServer.Reference.Commerce.Site
             });
 
             services.AddGoogleProductFeed(x =>
-                {
-                    x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
-                });
+            {
+                x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+            });
 
             services.AddTransient<FeedBuilder, EpiBaseImplementation>();
         }
