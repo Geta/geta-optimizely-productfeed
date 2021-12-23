@@ -56,12 +56,12 @@ protected abstract Entry GenerateEntry(CatalogContentBase catalogContent);
 For example:
 
 ```csharp
-public class EpiFeedBuilder : DefaultFeedBuilderBase
+public class MyFeedBuilder : DefaultFeedBuilderBase
 {
     private readonly IPricingService _pricingService;
     private readonly Uri _siteUri;
 
-    public EpiFeedBuilder(
+    public MyFeedBuilder(
         IContentLoader contentLoader,
         ReferenceConverter referenceConverter,
         IPricingService pricingService,
@@ -107,7 +107,7 @@ Below is given sample feed builder (based on Quicksilver demo project). Please u
 Also, keep in mind that for example error handling is not implemented in this sample (which means if variation generation fails - job will be aborted and feed will not be generated at all).
 
 ```csharp
-public class EpiFeedBuilder : FeedBuilder
+public class MyFeedBuilder : FeedBuilder
 {
     private readonly IContentLoader _contentLoader;
     private readonly ReferenceConverter _referenceConverter;
@@ -116,7 +116,7 @@ public class EpiFeedBuilder : FeedBuilder
     private readonly IContentLanguageAccessor _languageAccessor;
     private readonly Uri _siteUri;
 
-    public EpiFeedBuilder(
+    public MyFeedBuilder(
         IContentLoader contentLoader,
         ReferenceConverter referenceConverter,
         IPricingService pricingService,
@@ -126,7 +126,7 @@ public class EpiFeedBuilder : FeedBuilder
         _contentLoader = contentLoader;
         _referenceConverter = referenceConverter;
         _pricingService = pricingService;
-        _logger = LogManager.GetLogger(typeof(EpiFeedBuilder));
+        _logger = LogManager.GetLogger(typeof(MyFeedBuilder));
         _languageAccessor = languageAccessor;
         _siteUri = GetPrimaryHostDefinition(siteDefinitionRepository.List().FirstOrDefault()?.Hosts)?.Url;
     }
@@ -240,7 +240,7 @@ public class EpiFeedBuilder : FeedBuilder
 Then you need to use this as the default implementation for `FeedBuilder`.
 
 ```csharp
-services.AddTransient<FeedBuilder, EpiFeedBuilder>();
+services.AddTransient<FeedBuilder, MyFeedBuilder>();
 ```
 
 ## Feed Generation
