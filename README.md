@@ -260,6 +260,7 @@ See description in [shared repository](https://github.com/Geta/package-shared/bl
 Instead of using the static IP addresses the following hostnames can be used out-of-the-box.
 
 http://googleproductfeed.getalocaltest.me
+
 http://manager-googleproductfeed.getalocaltest.me
 
 

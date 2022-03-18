@@ -1,15 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.GoogleProductFeed", "src\Geta.Optimizely.GoogleProductFeed\Geta.Optimizely.GoogleProductFeed.csproj", "{D20EADEE-A3BE-4D07-94A6-1D5FB74FC00B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{C8506E1D-8573-4F07-8EE5-C6B93FAC0708}"
+	ProjectSection(SolutionItems) = preProject
+		sandbox\dependencies.props = sandbox\dependencies.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EPiServer.Reference.Commerce.Site", "sandbox\Quicksilver\EPiServer.Reference.Commerce.Site\EPiServer.Reference.Commerce.Site.csproj", "{D7601C31-87F8-4D3C-B17F-6FA7967D679B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.Optimizely.GoogleProductFeed.EfDesign", "src\Geta.Optimizely.GoogleProductFeed.EfDesign\Geta.Optimizely.GoogleProductFeed.EfDesign.csproj", "{03169E46-5F5E-4BE0-A24A-81A86B7095E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.GoogleProductFeed.EfDesign", "src\Geta.Optimizely.GoogleProductFeed.EfDesign\Geta.Optimizely.GoogleProductFeed.EfDesign.csproj", "{03169E46-5F5E-4BE0-A24A-81A86B7095E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{101034E2-A502-40C6-A4A8-FD87BF9634E6}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE = LICENSE
+		NuGet.config = NuGet.config
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

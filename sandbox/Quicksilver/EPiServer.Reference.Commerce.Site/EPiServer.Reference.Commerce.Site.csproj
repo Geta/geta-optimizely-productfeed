@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<None Include="wwwroot\**\*.*" />
 		<EmbeddedResource Include="lang\**\*" />
+		<PackageReference Include="EPiServer.CMS" Version="12.1.0" />
     <PackageReference Include="EPiServer.Commerce" Version="$(CommerceCoreVersion)" />
     <PackageReference Include="EPiServer.Personalization.Commerce" Version="$(CommerceTrackingeVersion)" />
     <PackageReference Include="Serilog" Version="$(SerilogVersion)" />

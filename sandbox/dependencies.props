@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
-    <CmsCoreVersion>12.0.3</CmsCoreVersion>
-    <CmsUIVersion>12.0.2</CmsUIVersion>
+    <CmsCoreVersion>12.1.0</CmsCoreVersion>
+    <CmsUIVersion>12.1.0</CmsUIVersion>
     <TelemetryVersion>2.0.0</TelemetryVersion>
-    <CommerceCoreVersion>14.0.2</CommerceCoreVersion>
+    <CommerceCoreVersion>14.1.0</CommerceCoreVersion>
     <CommerceTrackingeVersion>4.0.2</CommerceTrackingeVersion>
     <SerilogVersion>2.10.0</SerilogVersion>
     <SerilogAspNetCoreVersion>3.4.0</SerilogAspNetCoreVersion>
