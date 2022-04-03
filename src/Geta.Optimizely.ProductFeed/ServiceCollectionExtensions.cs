@@ -23,7 +23,8 @@ namespace Geta.Optimizely.ProductFeed
             this IServiceCollection services,
             Action<ProductFeedOptions> setupAction)
         {
-            services.AddControllers()
+            services
+                .AddControllers()
                 .AddXmlSerializerFormatters();
 
             services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
@@ -35,17 +36,18 @@ namespace Geta.Optimizely.ProductFeed
             services.AddTransient<IProductFeedBuilder, ProductFeedBuilder>();
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient(provider =>
-                new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
+                                      new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
 
             services.AddTransient<FeedBuilderCreateJob>();
 
             services.AddHostedService<MigrationService>();
 
-            services.AddOptions<ProductFeedOptions>().Configure<IConfiguration>((options, configuration) =>
-            {
-                setupAction(options);
-                configuration.GetSection("Geta:ProductFeed").Bind(options);
-            });
+            services.AddOptions<ProductFeedOptions>()
+                .Configure<IConfiguration>((options, configuration) =>
+                {
+                    setupAction(options);
+                    configuration.GetSection("Geta:ProductFeed").Bind(options);
+                });
 
             return services;
         }

@@ -9,9 +9,7 @@ namespace Geta.Optimizely.ProductFeed.Repositories
 {
     public interface IFeedRepository
     {
-        void RemoveOldVersions(int numberOfGeneratedFeeds);
-
-        FeedMedia GetLatestFeedData(Uri siteHost);
+        FeedMedia GetLatestFeed(Uri siteHost);
 
         void Save(ICollection<FeedEntity> feedData);
     }

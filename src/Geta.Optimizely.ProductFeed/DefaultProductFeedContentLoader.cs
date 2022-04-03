@@ -1,9 +1,8 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using EPiServer;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
@@ -17,7 +16,9 @@ namespace Geta.Optimizely.ProductFeed
         private readonly IContentLanguageAccessor _languageAccessor;
         private readonly ReferenceConverter _referenceConverter;
 
-        public DefaultProductFeedContentLoader(IContentLoader contentLoader, ReferenceConverter referenceConverter,
+        public DefaultProductFeedContentLoader(
+            IContentLoader contentLoader,
+            ReferenceConverter referenceConverter,
             IContentLanguageAccessor languageAccessor)
         {
             _contentLoader = contentLoader;
@@ -35,10 +36,7 @@ namespace Geta.Optimizely.ProductFeed
 
         private LoaderOptions CreateDefaultLoadOption()
         {
-            var loaderOptions = new LoaderOptions
-            {
-                LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language)
-            };
+            var loaderOptions = new LoaderOptions { LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language) };
 
             return loaderOptions;
         }

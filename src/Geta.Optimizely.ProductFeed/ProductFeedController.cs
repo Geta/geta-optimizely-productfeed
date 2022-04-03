@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Text;
 using Geta.Optimizely.ProductFeed.Repositories;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -20,14 +21,14 @@ namespace Geta.Optimizely.ProductFeed
         public IActionResult Get()
         {
             var host = HttpContext.Request.GetDisplayUrl();
-            var feedInfo = _feedRepository.GetLatestFeedData(new Uri(host));
+            var feedInfo = _feedRepository.GetLatestFeed(new Uri(host));
 
             if (feedInfo == null)
             {
                 return NotFound("Feed not found");
             }
 
-            return File(feedInfo.Data, feedInfo.Descriptor.MimeType, feedInfo.Descriptor.FileName);
+            return Content(Encoding.UTF8.GetString(feedInfo.Data), feedInfo.Descriptor.MimeType);
         }
     }
 }

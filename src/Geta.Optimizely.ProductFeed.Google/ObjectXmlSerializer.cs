@@ -1,13 +1,16 @@
-﻿using System;
+// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
+using System;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Geta.Optimizely.ProductFeed.Infrastructure
+namespace Geta.Optimizely.ProductFeed.Google
 {
     public static class ObjectXmlSerializer
     {
-        public static string Serialize(object value, Type type)
+        public static byte[] Serialize(object value, Type type)
         {
             var namespaces = new XmlSerializerNamespaces();
             namespaces.Add("g", "http://base.google.com/ns/1.0");
@@ -21,7 +24,7 @@ namespace Geta.Optimizely.ProductFeed.Infrastructure
             serializer.Serialize(xmlWriter, value, namespaces);
             xmlWriter.Close();
 
-            return stringWriter.ToString();
+            return Encoding.UTF8.GetBytes(stringWriter.ToString());
         }
     }
 }

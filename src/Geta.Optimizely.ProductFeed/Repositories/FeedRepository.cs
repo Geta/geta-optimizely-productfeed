@@ -21,30 +21,7 @@ namespace Geta.Optimizely.ProductFeed.Repositories
             _descriptors = descriptors;
         }
 
-        public void RemoveOldVersions(int numberOfGeneratedFeeds)
-        {
-            var items = _applicationDbContext.FeedData
-                                             .Select(x => new
-                                             {
-                                                 x.Id,
-                                                 x.CreatedUtc
-                                             }).OrderByDescending(x => x.CreatedUtc).ToList();
-
-            if (items.Count > numberOfGeneratedFeeds)
-            {
-                for (var i = items.Count - 1; i >= numberOfGeneratedFeeds; i--)
-                {
-                    var feedData = new FeedEntity { Id = items[i].Id };
-
-                    _applicationDbContext.FeedData.Attach(feedData);
-                    _applicationDbContext.FeedData.Remove(feedData);
-                }
-
-                _applicationDbContext.SaveChanges();
-            }
-        }
-
-        public FeedMedia GetLatestFeedData(Uri siteHost)
+        public FeedMedia GetLatestFeed(Uri siteHost)
         {
             if (siteHost == null)
             {
@@ -60,9 +37,6 @@ namespace Geta.Optimizely.ProductFeed.Repositories
             return new FeedMedia(feedContent?.FeedBytes, FindDescriptorByUrl(siteHost.PathAndQuery.TrimStart('/')));
         }
 
-        private FeedDescriptor FindDescriptorByUrl(string pathAndQuery) =>
-            _descriptors.FirstOrDefault(d => d.FileName.TrimStart('/').Equals(pathAndQuery, StringComparison.InvariantCultureIgnoreCase));
-
         public void Save(ICollection<FeedEntity> feedData)
         {
             if (feedData == null)
@@ -72,11 +46,27 @@ namespace Geta.Optimizely.ProductFeed.Repositories
 
             foreach (var data in feedData)
             {
-                data.CreatedUtc = DateTime.UtcNow;
+                var found = _applicationDbContext.FeedData.FirstOrDefault(f => f.Link.Contains(data.Link));
 
-                _applicationDbContext.FeedData.Add(data);
+                if (found != null)
+                {
+                    found.CreatedUtc = DateTime.UtcNow;
+                    found.FeedBytes = data.FeedBytes;
+                }
+                else
+                {
+                    data.CreatedUtc = DateTime.UtcNow;
+                    _applicationDbContext.FeedData.Add(data);
+                }
+
                 _applicationDbContext.SaveChanges();
             }
+        }
+
+        private FeedDescriptor FindDescriptorByUrl(string pathAndQuery)
+        {
+            return _descriptors.FirstOrDefault(d => d.FileName.TrimStart('/')
+                                                   .Equals(pathAndQuery, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

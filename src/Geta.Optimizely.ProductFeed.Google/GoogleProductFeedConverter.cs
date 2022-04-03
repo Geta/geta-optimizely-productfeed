@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml.Serialization;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google.Models;
@@ -18,7 +16,6 @@ namespace Geta.Optimizely.ProductFeed.Google
         private readonly GoogleFeedDescriptor _descriptor;
         private readonly Func<Type, IProductFeedEntityMapper> _mapperFactory;
         private readonly ILogger<GoogleProductFeedConverter> _logger;
-        private const string Ns = "http://www.w3.org/2005/Atom";
 
         public GoogleProductFeedConverter(
             GoogleFeedDescriptor descriptor,
@@ -73,15 +70,9 @@ namespace Geta.Optimizely.ProductFeed.Google
                 var feedData = new FeedEntity
                 {
                     CreatedUtc = generatedFeed.Updated,
-                    Link = generatedFeed.Link
+                    Link = generatedFeed.Link,
+                    FeedBytes = ObjectXmlSerializer.Serialize(generatedFeed, typeof(Feed))
                 };
-
-                using (var ms = new MemoryStream())
-                {
-                    var serializer = new XmlSerializer(typeof(Feed), Ns);
-                    serializer.Serialize(ms, generatedFeed);
-                    feedData.FeedBytes = ms.ToArray();
-                }
 
                 generatedFeedsData.Add(feedData);
             }

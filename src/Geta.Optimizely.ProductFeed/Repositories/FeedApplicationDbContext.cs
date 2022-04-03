@@ -6,6 +6,7 @@ using Geta.Optimizely.ProductFeed.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
+// TODO: test namespace change
 namespace Geta.Optimizely.GoogleProductFeed.Repositories
 {
     public class FeedApplicationDbContext : DbContext

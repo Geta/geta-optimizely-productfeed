@@ -22,11 +22,11 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public Type Converter { get; private set; }
 
+        public Type Mapper { get; protected set; }
+
         public void SetConverter<TConverter>() where TConverter : IProductFeedContentConverter
         {
             Converter = typeof(TConverter);
         }
-
-        public Type Mapper { get; protected set; }
     }
 }
