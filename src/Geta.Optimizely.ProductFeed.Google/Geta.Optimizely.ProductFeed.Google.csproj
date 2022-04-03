@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Version>1.0.0</Version>
-    <PackageId>Geta.Optimizely.ProductFeed</PackageId>
-    <Title>Geta Optimizely Product Feed</Title>
+    <PackageId>Geta.Optimizely.ProductFeed.Google</PackageId>
+    <Title>Geta Optimizely Google Product Feed</Title>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>
@@ -13,9 +13,9 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://cdn.geta.no/opensource/icons/Geta-logo-3.png</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>Product Feed core library.</Description>
+    <Description>Creates a Google Product Feed based on the Atom specification for Optimizely Commerce.</Description>
     <PackageReleaseNotes>https://github.com/Geta/geta-optimizely-productfeed/blob/master/CHANGELOG.md</PackageReleaseNotes>
-    <PackageTags>Optimizely Episerver Commerce Product Feed</PackageTags>
+    <PackageTags>Optimizely Episerver Commerce Google Product Feed</PackageTags>
     <RepositoryUrl>https://github.com/Geta/geta-optimizely-productfeed.git</RepositoryUrl>
   </PropertyGroup>
 

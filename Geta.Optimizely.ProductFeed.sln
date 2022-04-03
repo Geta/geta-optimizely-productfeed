@@ -17,6 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EPiServer.Reference.Commerc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.EfDesign", "src\Geta.Optimizely.ProductFeed.EfDesign\Geta.Optimizely.ProductFeed.EfDesign.csproj", "{03169E46-5F5E-4BE0-A24A-81A86B7095E1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Google", "src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj", "{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{037A2A73-2A17-4157-8A8F-59F26A78E6CC}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +42,10 @@ Global
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
