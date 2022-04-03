@@ -31,7 +31,6 @@ namespace Geta.Optimizely.ProductFeed
             services.AddSingleton<Func<Type, IProductFeedContentConverter>>(
                 provider => t => provider.GetRequiredService(t) as IProductFeedContentConverter);
 
-            services.AddTransient<IProductFeedBuilder, ProductFeedBuilder>();
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient(provider =>
                                       new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
