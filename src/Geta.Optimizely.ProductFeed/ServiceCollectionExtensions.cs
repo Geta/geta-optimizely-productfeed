@@ -19,9 +19,7 @@ namespace Geta.Optimizely.ProductFeed
             return services.AddProductFeed(_ => { });
         }
 
-        public static IServiceCollection AddProductFeed(
-            this IServiceCollection services,
-            Action<ProductFeedOptions> setupAction)
+        public static IServiceCollection AddProductFeed(this IServiceCollection services, Action<ProductFeedOptions> setupAction)
         {
             services
                 .AddControllers()
