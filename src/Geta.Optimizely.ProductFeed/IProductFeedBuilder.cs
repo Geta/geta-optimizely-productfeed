@@ -3,11 +3,11 @@
 
 using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.GoogleProductFeed
+namespace Geta.Optimizely.ProductFeed
 {
-    public interface IFeedHelper
+    public interface IProductFeedBuilder
     {
-        bool GenerateAndSaveData();
+        bool Build();
 
         Feed GetLatestFeed(string siteHost);
     }

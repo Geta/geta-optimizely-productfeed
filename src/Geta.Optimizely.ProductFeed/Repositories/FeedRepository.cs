@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Geta.Optimizely.ProductFeed.Models;
@@ -45,17 +46,20 @@ namespace Geta.Optimizely.ProductFeed.Repositories
             return _applicationDbContext.FeedData.Where(f => f.Link.Contains(siteHost)).OrderByDescending(f => f.CreatedUtc).FirstOrDefault();
         }
 
-        public void Save(FeedData feedData)
+        public void Save(ICollection<FeedData> feedData)
         {
             if (feedData == null)
             {
                 return;
             }
 
-            feedData.CreatedUtc = DateTime.UtcNow;
+            foreach (var data in feedData)
+            {
+                data.CreatedUtc = DateTime.UtcNow;
 
-            _applicationDbContext.FeedData.Add(feedData);
-            _applicationDbContext.SaveChanges();
+                _applicationDbContext.FeedData.Add(data);
+                _applicationDbContext.SaveChanges();
+            }
         }
     }
 }

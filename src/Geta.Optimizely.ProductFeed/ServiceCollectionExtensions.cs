@@ -1,4 +1,4 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
@@ -27,7 +27,16 @@ namespace Geta.Optimizely.ProductFeed
             services.AddControllers()
                 .AddXmlSerializerFormatters();
 
-            services.AddTransient<IFeedHelper, FeedHelper>();
+            services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
+            services.AddTransient<IProductFeedContentEnricher, DefaultIProductFeedContentEnricher>();
+
+            services.AddSingleton<Func<Type, IProductFeedContentConverter>>(
+                provider => t => provider.GetRequiredService(t) as IProductFeedContentConverter);
+
+            services.AddSingleton<Func<Type, IProductFeedEntityMapper>>(
+                provider => t => provider.GetRequiredService(t) as IProductFeedEntityMapper);
+
+            services.AddTransient<IProductFeedBuilder, ProductFeedBuilder>();
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient(provider =>
                 new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
@@ -39,7 +48,7 @@ namespace Geta.Optimizely.ProductFeed
             services.AddOptions<ProductFeedOptions>().Configure<IConfiguration>((options, configuration) =>
             {
                 setupAction(options);
-                configuration.GetSection("Geta:GoogleProductFeed").Bind(options);
+                configuration.GetSection("Geta:ProductFeed").Bind(options);
             });
 
             return services;

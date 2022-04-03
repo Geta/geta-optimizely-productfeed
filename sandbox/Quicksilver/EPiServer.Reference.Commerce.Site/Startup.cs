@@ -116,9 +116,10 @@ namespace EPiServer.Reference.Commerce.Site
 
             services
                 .AddProductFeed(x => { x.ConnectionString = _configuration.GetConnectionString("EPiServerDB"); })
-                .AddGoogleProductFeed();
-
-            services.AddTransient<FeedBuilder, EpiBaseImplementation>();
+                .AddGoogleProductFeed(descriptor =>
+                {
+                    descriptor.SetMapper<FeedEntityMapper>();
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

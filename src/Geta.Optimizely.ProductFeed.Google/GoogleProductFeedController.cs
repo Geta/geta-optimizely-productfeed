@@ -16,18 +16,18 @@ namespace Geta.Optimizely.ProductFeed.Google
     [Produces("application/xml")]
     public class GoogleProductFeedController : ControllerBase
     {
-        private readonly IFeedHelper _feedHelper;
+        private readonly IProductFeedBuilder _productFeedBuilder;
 
-        public GoogleProductFeedController(IFeedHelper feedHelper)
+        public GoogleProductFeedController(IProductFeedBuilder productFeedBuilder)
         {
-            _feedHelper = feedHelper;
+            _productFeedBuilder = productFeedBuilder;
         }
 
         [Route("googleproductfeed")]
         public async Task<IActionResult> Get()
         {
             var siteHost = HttpContext.Request.Host.ToString();
-            var feed = _feedHelper.GetLatestFeed(siteHost);
+            var feed = _productFeedBuilder.GetLatestFeed(siteHost);
 
             if (feed == null)
             {

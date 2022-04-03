@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.Commerce.Catalog.ContentTypes;
@@ -9,44 +12,37 @@ using EPiServer.Reference.Commerce.Site.Features.Shared.Services;
 using EPiServer.Web;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Models;
-using Mediachase.Commerce.Catalog;
 
 namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
 {
-    public class EpiBaseImplementation : DefaultFeedBuilderBase
+    public class FeedEntityMapper : IProductFeedEntityMapper
     {
         private readonly IContentLoader _contentLoader;
         private readonly IPricingService _pricingService;
         private readonly string _siteUrl;
 
-        public EpiBaseImplementation(
+        public FeedEntityMapper(
             IContentLoader contentLoader,
-            ISiteDefinitionRepository siteDefinitionRepository,
-            ReferenceConverter referenceConverter,
             IPricingService pricingService,
-            IContentLanguageAccessor languageAccessor) :
-            base(contentLoader, referenceConverter, languageAccessor)
+            ISiteDefinitionRepository siteDefinitionRepository)
         {
             _contentLoader = contentLoader;
             _pricingService = pricingService;
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        protected override Feed GenerateFeedEntity()
+        public Feed GenerateFeedEntity()
         {
-            return new Feed
-            {
-                Updated = DateTime.UtcNow,
-                Title = "My products",
-                Link = _siteUrl
-            };
+            return new Feed { Updated = DateTime.UtcNow, Title = "My products", Link = _siteUrl };
         }
 
-        protected override Entry GenerateEntry(CatalogContentBase catalogContent)
+        public Entry GenerateEntry(CatalogContentBase catalogContent)
         {
             var variationContent = catalogContent as FashionVariant;
             if (variationContent == null)
+            {
                 return null;
+            }
 
             var product = _contentLoader.Get<CatalogContentBase>(variationContent.GetParentProducts().FirstOrDefault()) as FashionProduct;
             var variantCode = variationContent.Code;
@@ -66,7 +62,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
                 GoogleProductCategory = string.Empty,
                 Shipping = new List<Shipping>
                 {
-                    new Shipping
+                    new()
                     {
                         Price = "1 USD",
                         Country = "US",
@@ -77,7 +73,9 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
 
             var image = variationContent.GetDefaultAsset<IContentImage>();
             if (!string.IsNullOrEmpty(image))
+            {
                 entry.ImageLink = Uri.TryCreate(new Uri(_siteUrl), image, out var imageUri) ? imageUri.ToString() : image;
+            }
 
             if (defaultPrice != null)
             {
