@@ -4,10 +4,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using Geta.Optimizely.GoogleProductFeed.Models;
-using Geta.Optimizely.GoogleProductFeed.Repositories;
+using Geta.Optimizely.GoogleProductFeed;
+using Geta.Optimizely.ProductFeed.Models;
+using Geta.Optimizely.ProductFeed.Repositories;
 
-namespace Geta.Optimizely.GoogleProductFeed
+namespace Geta.Optimizely.ProductFeed
 {
     public class FeedHelper : IFeedHelper
     {

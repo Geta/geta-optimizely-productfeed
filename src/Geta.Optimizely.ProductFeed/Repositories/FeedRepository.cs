@@ -3,9 +3,10 @@
 
 using System;
 using System.Linq;
-using Geta.Optimizely.GoogleProductFeed.Models;
+using Geta.Optimizely.GoogleProductFeed.Repositories;
+using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.GoogleProductFeed.Repositories
+namespace Geta.Optimizely.ProductFeed.Repositories
 {
     public class FeedRepository : IFeedRepository
     {

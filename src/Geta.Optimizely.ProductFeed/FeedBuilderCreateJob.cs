@@ -3,13 +3,14 @@
 
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
+using Geta.Optimizely.GoogleProductFeed;
 
-namespace Geta.Optimizely.GoogleProductFeed
+namespace Geta.Optimizely.ProductFeed
 {
     [ScheduledPlugIn(
         GUID = "F270B8BF-7B25-4254-B4D3-4FE843B2D559",
-        DisplayName = "Google ProductFeed - Create feed",
-        Description = "Creates and stores Google product feed in database")]
+        DisplayName = "ProductFeed - Create feed",
+        Description = "Creates and stores product feeds")]
     public class FeedBuilderCreateJob : ScheduledJobBase
     {
         private readonly IFeedHelper _feedHelper;

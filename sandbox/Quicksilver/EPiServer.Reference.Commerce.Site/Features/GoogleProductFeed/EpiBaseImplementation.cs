@@ -7,8 +7,8 @@ using EPiServer.Reference.Commerce.Site.Features.Product.Models;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Extensions;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Services;
 using EPiServer.Web;
-using Geta.Optimizely.GoogleProductFeed;
-using Geta.Optimizely.GoogleProductFeed.Models;
+using Geta.Optimizely.ProductFeed;
+using Geta.Optimizely.ProductFeed.Models;
 using Mediachase.Commerce.Catalog;
 
 namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed

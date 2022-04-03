@@ -26,9 +26,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
-using Geta.Optimizely.GoogleProductFeed;
-using Geta.Optimizely.GoogleProductFeed.Configuration;
 using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
+using Geta.Optimizely.ProductFeed;
+using Geta.Optimizely.ProductFeed.Google;
 
 namespace EPiServer.Reference.Commerce.Site
 {
@@ -114,10 +114,9 @@ namespace EPiServer.Reference.Commerce.Site
                 o.DisableOrderDataLocalization = true;
             });
 
-            services.AddGoogleProductFeed(x =>
-            {
-                x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
-            });
+            services
+                .AddProductFeed(x => { x.ConnectionString = _configuration.GetConnectionString("EPiServerDB"); })
+                .AddGoogleProductFeed();
 
             services.AddTransient<FeedBuilder, EpiBaseImplementation>();
         }

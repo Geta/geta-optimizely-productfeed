@@ -2,9 +2,8 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using Geta.Optimizely.GoogleProductFeed.Models;
 
-namespace Geta.Optimizely.GoogleProductFeed.Infrastructure
+namespace Geta.Optimizely.ProductFeed.Infrastructure
 {
     public static class ObjectXmlSerializer
     {

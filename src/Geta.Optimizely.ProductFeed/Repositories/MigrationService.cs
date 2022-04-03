@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Geta.Optimizely.GoogleProductFeed.Repositories
+namespace Geta.Optimizely.ProductFeed.Repositories
 {
     public class MigrationService : IHostedService
     {
@@ -21,7 +22,7 @@ namespace Geta.Optimizely.GoogleProductFeed.Repositories
             using var scope = _serviceProvider.CreateScope();
             var myDbContext = scope.ServiceProvider.GetRequiredService<FeedApplicationDbContext>();
 
-            await myDbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
+            await myDbContext.Database.MigrateAsync(cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

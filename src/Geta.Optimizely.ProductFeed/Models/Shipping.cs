@@ -4,7 +4,7 @@
 using System;
 using System.Xml.Serialization;
 
-namespace Geta.Optimizely.GoogleProductFeed.Models
+namespace Geta.Optimizely.ProductFeed.Models
 {
     [XmlType(TypeName = "shipping")]
     [Serializable]

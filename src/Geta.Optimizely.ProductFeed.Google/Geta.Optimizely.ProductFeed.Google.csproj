@@ -37,4 +37,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
+  </ItemGroup>
+
 </Project>

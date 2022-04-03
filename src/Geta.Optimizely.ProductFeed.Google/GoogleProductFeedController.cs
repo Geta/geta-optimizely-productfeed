@@ -4,12 +4,13 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Geta.Optimizely.GoogleProductFeed.Infrastructure;
-using Geta.Optimizely.GoogleProductFeed.Models;
+using Geta.Optimizely.GoogleProductFeed;
+using Geta.Optimizely.ProductFeed.Infrastructure;
+using Geta.Optimizely.ProductFeed.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Geta.Optimizely.GoogleProductFeed
+namespace Geta.Optimizely.ProductFeed.Google
 {
     [ApiController]
     [Produces("application/xml")]
@@ -30,7 +31,7 @@ namespace Geta.Optimizely.GoogleProductFeed
 
             if (feed == null)
             {
-                return new ContentResult()
+                return new ContentResult
                 {
                     StatusCode = StatusCodes.Status404NotFound,
                     Content = ObjectXmlSerializer.Serialize("No feed generated", typeof(string)),
@@ -38,7 +39,9 @@ namespace Geta.Optimizely.GoogleProductFeed
                 };
             }
 
-            feed.Entries = feed.Entries.Where(e => e.Link.Contains(siteHost)).ToList();
+            feed.Entries = feed.Entries
+                .Where(e => e.Link.Contains(siteHost))
+                .ToList();
 
             return Content(ObjectXmlSerializer.Serialize(feed, typeof(Feed)), "application/xml", Encoding.UTF8);
         }

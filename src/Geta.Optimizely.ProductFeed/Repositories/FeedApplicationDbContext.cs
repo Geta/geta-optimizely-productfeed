@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using Geta.Optimizely.GoogleProductFeed.Configuration;
-using Geta.Optimizely.GoogleProductFeed.Models;
+using Geta.Optimizely.ProductFeed.Configuration;
+using Geta.Optimizely.ProductFeed.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +12,7 @@ namespace Geta.Optimizely.GoogleProductFeed.Repositories
     {
         private readonly string _connectionString;
 
-        public FeedApplicationDbContext(IOptions<GoogleProductFeedOptions> options)
+        public FeedApplicationDbContext(IOptions<ProductFeedOptions> options)
         {
             _connectionString = options.Value.ConnectionString;
         }

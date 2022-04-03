@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Geta.Optimizely.GoogleProductFeed.Infrastructure
+namespace Geta.Optimizely.ProductFeed.Infrastructure
 {
     public sealed class EncodedStringWriter : StringWriter
     {

@@ -4,7 +4,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Geta.Optimizely.GoogleProductFeed.Models
+namespace Geta.Optimizely.ProductFeed.Models
 {
     public class FeedData
     {

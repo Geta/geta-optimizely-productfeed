@@ -8,10 +8,11 @@ using EPiServer;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
 using EPiServer.Logging;
-using Geta.Optimizely.GoogleProductFeed.Models;
+using Geta.Optimizely.GoogleProductFeed;
+using Geta.Optimizely.ProductFeed.Models;
 using Mediachase.Commerce.Catalog;
 
-namespace Geta.Optimizely.GoogleProductFeed
+namespace Geta.Optimizely.ProductFeed
 {
     public abstract class DefaultFeedBuilderBase : FeedBuilder
     {
