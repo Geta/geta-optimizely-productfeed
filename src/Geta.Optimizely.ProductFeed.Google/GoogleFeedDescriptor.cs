@@ -5,11 +5,16 @@ using Geta.Optimizely.ProductFeed.Configuration;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
-    public class GoogleProductFeedDescriptor : ProductFeedDescriptor
+    public class GoogleFeedDescriptor : FeedDescriptor
     {
-        public GoogleProductFeedDescriptor() : base("google", "googlefeed", "application/xml")
+        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml")
         {
             SetConverter<GoogleProductFeedConverter>();
+        }
+
+        public void SetMapper<TMapper>() where TMapper : IProductFeedEntityMapper
+        {
+            Mapper = typeof(TMapper);
         }
     }
 }

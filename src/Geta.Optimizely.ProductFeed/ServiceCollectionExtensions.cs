@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using Geta.Optimizely.GoogleProductFeed;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Repositories;
@@ -32,9 +31,6 @@ namespace Geta.Optimizely.ProductFeed
 
             services.AddSingleton<Func<Type, IProductFeedContentConverter>>(
                 provider => t => provider.GetRequiredService(t) as IProductFeedContentConverter);
-
-            services.AddSingleton<Func<Type, IProductFeedEntityMapper>>(
-                provider => t => provider.GetRequiredService(t) as IProductFeedEntityMapper);
 
             services.AddTransient<IProductFeedBuilder, ProductFeedBuilder>();
             services.AddTransient<IFeedRepository, FeedRepository>();

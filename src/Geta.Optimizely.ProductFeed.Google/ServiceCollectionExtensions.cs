@@ -3,7 +3,6 @@
 
 using System;
 using Geta.Optimizely.ProductFeed.Configuration;
-using Lucene.Net.Util.Automaton;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.Optimizely.ProductFeed.Google
@@ -12,12 +11,15 @@ namespace Geta.Optimizely.ProductFeed.Google
     {
         public static IServiceCollection AddGoogleProductFeed(
             this IServiceCollection services,
-            Action<GoogleProductFeedDescriptor> setupAction)
+            Action<GoogleFeedDescriptor> setupAction)
         {
             services.AddTransient<GoogleProductFeedConverter>();
 
-            var descriptor = new GoogleProductFeedDescriptor();
+            var descriptor = new GoogleFeedDescriptor();
             setupAction(descriptor);
+
+            services.AddSingleton<Func<Type, IProductFeedEntityMapper>>(
+                provider => t => provider.GetRequiredService(t) as IProductFeedEntityMapper);
 
             // register mappers
             if (descriptor.Mapper != null)
@@ -25,7 +27,7 @@ namespace Geta.Optimizely.ProductFeed.Google
                 services.AddTransient(descriptor.Mapper);
             }
 
-            services.AddSingleton<ProductFeedDescriptor>(descriptor);
+            services.AddSingleton<FeedDescriptor>(descriptor);
             services.AddSingleton(descriptor);
 
             return services;

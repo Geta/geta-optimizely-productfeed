@@ -28,6 +28,7 @@ using System;
 using System.IO;
 using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.ProductFeed;
+using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google;
 
 namespace EPiServer.Reference.Commerce.Site
@@ -139,6 +140,7 @@ namespace EPiServer.Reference.Commerce.Site
                 endpoints.MapControllerRoute(name: "Default", pattern: "{controller}/{action}/{id?}");
                 endpoints.MapControllers();
                 endpoints.MapContent();
+                endpoints.MapProductFeeds();
             });
         }
     }

@@ -1,6 +1,6 @@
-﻿using System.Xml.Serialization;
+using System.Xml.Serialization;
 
-namespace Geta.Optimizely.ProductFeed.Models
+namespace Geta.Optimizely.ProductFeed.Google.Models
 {
     public class Installment
     {

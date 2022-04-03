@@ -4,9 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Serialization;
 using EPiServer.Commerce.Catalog.ContentTypes;
+using Geta.Optimizely.ProductFeed.Configuration;
+using Geta.Optimizely.ProductFeed.Google.Models;
 using Geta.Optimizely.ProductFeed.Models;
 using Microsoft.Extensions.Logging;
 
@@ -14,13 +15,13 @@ namespace Geta.Optimizely.ProductFeed.Google
 {
     public class GoogleProductFeedConverter : IProductFeedContentConverter
     {
-        private readonly GoogleProductFeedDescriptor _descriptor;
+        private readonly GoogleFeedDescriptor _descriptor;
         private readonly Func<Type, IProductFeedEntityMapper> _mapperFactory;
         private readonly ILogger<GoogleProductFeedConverter> _logger;
         private const string Ns = "http://www.w3.org/2005/Atom";
 
         public GoogleProductFeedConverter(
-            GoogleProductFeedDescriptor descriptor,
+            GoogleFeedDescriptor descriptor,
             Func<Type, IProductFeedEntityMapper> mapperFactory,
             ILogger<GoogleProductFeedConverter> logger)
         {
@@ -29,18 +30,20 @@ namespace Geta.Optimizely.ProductFeed.Google
             _logger = logger;
         }
 
-        public ICollection<FeedData> Convert(ICollection<CatalogContentBase> sourceData)
+        public ICollection<FeedEntity> Convert(
+            ICollection<CatalogContentBase> sourceData,
+            FeedDescriptor feedDescriptor)
         {
-            var generatedFeedsData = new List<FeedData>();
+            var generatedFeedsData = new List<FeedEntity>();
             var generatedFeeds = new List<Feed>();
             var entries = new List<Entry>();
             var mapper = _mapperFactory(_descriptor.Mapper);
 
-            var feedEntity = mapper.GenerateFeedEntity();
+            var feedEntity = mapper.GenerateFeedEntity(feedDescriptor);
 
             if (feedEntity == null)
             {
-                return new List<FeedData>();
+                return new List<FeedEntity>();
             }
 
 
@@ -67,7 +70,7 @@ namespace Geta.Optimizely.ProductFeed.Google
 
             foreach (var generatedFeed in generatedFeeds)
             {
-                var feedData = new FeedData
+                var feedData = new FeedEntity
                 {
                     CreatedUtc = generatedFeed.Updated,
                     Link = generatedFeed.Link

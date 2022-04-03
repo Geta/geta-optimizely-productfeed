@@ -1,10 +1,10 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
 using System.Xml.Serialization;
 
-namespace Geta.Optimizely.ProductFeed.Models
+namespace Geta.Optimizely.ProductFeed.Google.Models
 {
     [XmlType(TypeName = "shipping")]
     [Serializable]

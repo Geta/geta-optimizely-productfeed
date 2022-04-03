@@ -1,9 +1,8 @@
-﻿// Copyright (c) Geta Digital. All rights reserved.
+// Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
-using Geta.Optimizely.GoogleProductFeed;
 
 namespace Geta.Optimizely.ProductFeed
 {
@@ -26,7 +25,7 @@ namespace Geta.Optimizely.ProductFeed
 
             return result
                 ? "Job successfully executed. Feed created and saved to the database."
-                : "Job failed - FeedBuilder.Build() returned null.";
+                : "Job failed. See log files for more details.";
         }
     }
 }

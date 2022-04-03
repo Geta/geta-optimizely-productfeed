@@ -5,9 +5,9 @@ using System;
 
 namespace Geta.Optimizely.ProductFeed.Configuration
 {
-    public abstract class ProductFeedDescriptor
+    public abstract class FeedDescriptor
     {
-        protected ProductFeedDescriptor(string name, string fileName, string mimeType)
+        protected FeedDescriptor(string name, string fileName, string mimeType)
         {
             Name = name;
             FileName = fileName;
@@ -27,11 +27,6 @@ namespace Geta.Optimizely.ProductFeed.Configuration
             Converter = typeof(TConverter);
         }
 
-        public Type Mapper { get; private set; }
-
-        public void SetMapper<TMapper>() where TMapper : IProductFeedEntityMapper
-        {
-            Mapper = typeof(TMapper);
-        }
+        public Type Mapper { get; protected set; }
     }
 }
