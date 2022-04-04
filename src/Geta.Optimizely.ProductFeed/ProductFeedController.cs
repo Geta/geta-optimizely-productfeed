@@ -21,14 +21,17 @@ namespace Geta.Optimizely.ProductFeed
         public IActionResult Get()
         {
             var host = HttpContext.Request.GetDisplayUrl();
-            var feedInfo = _feedRepository.GetLatestFeed(new Uri(host));
+            var siteHost = new Uri(host);
+            var feedInfo = _feedRepository.GetLatestFeed(siteHost);
 
             if (feedInfo == null)
             {
                 return NotFound("Feed not found");
             }
 
-            return Content(Encoding.UTF8.GetString(feedInfo.Data), feedInfo.Descriptor.MimeType);
+            var descriptor = _feedRepository.FindDescriptorByUrl(siteHost.PathAndQuery.TrimStart('/'));
+
+            return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
         }
     }
 }

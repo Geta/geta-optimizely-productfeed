@@ -21,7 +21,7 @@ namespace Geta.Optimizely.ProductFeed.Repositories
             _descriptors = descriptors;
         }
 
-        public FeedMedia GetLatestFeed(Uri siteHost)
+        public FeedEntity GetLatestFeed(Uri siteHost)
         {
             if (siteHost == null)
             {
@@ -34,7 +34,7 @@ namespace Geta.Optimizely.ProductFeed.Repositories
                 .OrderByDescending(f => f.CreatedUtc)
                 .FirstOrDefault();
 
-            return new FeedMedia(feedContent?.FeedBytes, FindDescriptorByUrl(siteHost.PathAndQuery.TrimStart('/')));
+            return feedContent;
         }
 
         public void Save(ICollection<FeedEntity> feedData)
@@ -63,10 +63,11 @@ namespace Geta.Optimizely.ProductFeed.Repositories
             }
         }
 
-        private FeedDescriptor FindDescriptorByUrl(string pathAndQuery)
+        public FeedDescriptor FindDescriptorByUrl(string pathAndQuery)
         {
-            return _descriptors.FirstOrDefault(d => d.FileName.TrimStart('/')
-                                                   .Equals(pathAndQuery, StringComparison.InvariantCultureIgnoreCase));
+            var path = pathAndQuery.TrimStart('/');
+
+            return _descriptors.FirstOrDefault(d => d.FileName.TrimStart('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

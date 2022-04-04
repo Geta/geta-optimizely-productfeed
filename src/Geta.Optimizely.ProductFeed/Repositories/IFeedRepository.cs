@@ -3,14 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Repositories
 {
     public interface IFeedRepository
     {
-        FeedMedia GetLatestFeed(Uri siteHost);
+        FeedEntity GetLatestFeed(Uri siteHost);
 
         void Save(ICollection<FeedEntity> feedData);
+
+        FeedDescriptor FindDescriptorByUrl(string pathAndQuery);
     }
 }

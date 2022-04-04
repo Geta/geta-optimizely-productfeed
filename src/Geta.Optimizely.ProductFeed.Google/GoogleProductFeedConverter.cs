@@ -3,38 +3,29 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Geta.Optimizely.ProductFeed.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
     public class GoogleProductFeedConverter : IProductFeedContentConverter
     {
-        private readonly GoogleFeedDescriptor _descriptor;
         private readonly Func<Type, IProductFeedEntityMapper> _mapperFactory;
-        private readonly ILogger<GoogleProductFeedConverter> _logger;
 
-        public GoogleProductFeedConverter(
-            GoogleFeedDescriptor descriptor,
-            Func<Type, IProductFeedEntityMapper> mapperFactory,
-            ILogger<GoogleProductFeedConverter> logger)
+        public GoogleProductFeedConverter(Func<Type, IProductFeedEntityMapper> mapperFactory)
         {
-            _descriptor = descriptor;
             _mapperFactory = mapperFactory ?? throw new ArgumentNullException(nameof(mapperFactory));
-            _logger = logger;
         }
 
         public ICollection<FeedEntity> Convert(
             ICollection<CatalogContentBase> sourceData,
             FeedDescriptor feedDescriptor)
         {
-            var generatedFeedsData = new List<FeedEntity>();
             var generatedFeeds = new List<Feed>();
-            var entries = new List<Entry>();
-            var mapper = _mapperFactory(_descriptor.Mapper);
+            var mapper = _mapperFactory(feedDescriptor.Mapper);
 
             var feedEntity = mapper.GenerateFeedEntity(feedDescriptor);
 
@@ -43,41 +34,20 @@ namespace Geta.Optimizely.ProductFeed.Google
                 return new List<FeedEntity>();
             }
 
+            feedEntity.Entries = sourceData
+                .Select(sd => mapper.GenerateEntry(sd))
+                .Where(sd => sd != null)
+                .ToList();
 
-            foreach (var catalogContent in sourceData)
-            {
-                try
-                {
-                    var entry = mapper.GenerateEntry(catalogContent);
-
-                    if (entry != null)
-                    {
-                        entries.Add(entry);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed to generate GoogleProductFeed entry for ContentGuid={catalogContent.ContentGuid}");
-                }
-            }
-
-            feedEntity.Entries = entries;
             generatedFeeds.Add(feedEntity);
 
-
-            foreach (var generatedFeed in generatedFeeds)
-            {
-                var feedData = new FeedEntity
+            return generatedFeeds
+                .Select(f => new FeedEntity
                 {
-                    CreatedUtc = generatedFeed.Updated,
-                    Link = generatedFeed.Link,
-                    FeedBytes = ObjectXmlSerializer.Serialize(generatedFeed, typeof(Feed))
-                };
-
-                generatedFeedsData.Add(feedData);
-            }
-
-            return generatedFeedsData;
+                    CreatedUtc = f.Updated,
+                    Link = f.Link,
+                    FeedBytes = ObjectXmlSerializer.Serialize(f, typeof(Feed))
+                }).ToList();
         }
     }
 }

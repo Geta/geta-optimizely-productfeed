@@ -105,6 +105,10 @@ namespace EPiServer.Reference.Commerce.Site
                 o.ModelBinderProviders.Insert(0, new ModelBinderProvider());
             });
 
+            services
+                .AddControllers()
+                .AddXmlSerializerFormatters();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/util/Login";

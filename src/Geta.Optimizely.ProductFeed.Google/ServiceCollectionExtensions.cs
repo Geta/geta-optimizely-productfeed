@@ -21,14 +21,13 @@ namespace Geta.Optimizely.ProductFeed.Google
             services.AddSingleton<Func<Type, IProductFeedEntityMapper>>(
                 provider => t => provider.GetRequiredService(t) as IProductFeedEntityMapper);
 
-            // register mappers
-            if (descriptor.Mapper != null)
+            if (descriptor.Mapper == null)
             {
-                services.AddTransient(descriptor.Mapper);
+                throw new InvalidOperationException("Google ProductFeed mapper is not set. Use `GoogleFeedDescriptor.SetMapper<T>` method to do so.");
             }
 
+            services.AddTransient(descriptor.Mapper);
             services.AddSingleton<FeedDescriptor>(descriptor);
-            services.AddSingleton(descriptor);
 
             return services;
         }

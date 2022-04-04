@@ -21,10 +21,6 @@ namespace Geta.Optimizely.ProductFeed
 
         public static IServiceCollection AddProductFeed(this IServiceCollection services, Action<ProductFeedOptions> setupAction)
         {
-            services
-                .AddControllers()
-                .AddXmlSerializerFormatters();
-
             services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
             services.AddTransient<IProductFeedContentEnricher, DefaultIProductFeedContentEnricher>();
 

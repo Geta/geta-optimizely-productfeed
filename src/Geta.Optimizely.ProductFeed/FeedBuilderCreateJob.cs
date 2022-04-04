@@ -47,11 +47,9 @@ namespace Geta.Optimizely.ProductFeed
 
         public override string Execute()
         {
-            // load
             var feedSourceData = _feedContentLoader.LoadSourceData();
             var successCount = 0;
 
-            // enrich
             foreach (var enricher in _enrichers)
             {
                 enricher.Enrich(feedSourceData);
@@ -72,7 +70,6 @@ namespace Geta.Optimizely.ProductFeed
 
                 try
                 {
-                    // convert
                     var converter = _converterFactory(feedDescriptor.Converter);
                     if (converter == null)
                     {
@@ -81,7 +78,6 @@ namespace Geta.Optimizely.ProductFeed
 
                     var result = converter.Convert(feedSourceData, feedDescriptor);
 
-                    // save
                     _feedRepository.Save(result);
 
                     successCount++;
