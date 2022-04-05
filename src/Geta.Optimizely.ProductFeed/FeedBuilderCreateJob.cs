@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 using Geta.Optimizely.ProductFeed.Configuration;
@@ -47,12 +48,13 @@ namespace Geta.Optimizely.ProductFeed
 
         public override string Execute()
         {
-            var feedSourceData = _feedContentLoader.LoadSourceData();
+            var ct = CancellationToken.None;
+            var feedSourceData = _feedContentLoader.LoadSourceData(ct);
             var successCount = 0;
 
             foreach (var enricher in _enrichers)
             {
-                enricher.Enrich(feedSourceData);
+                enricher.Enrich(feedSourceData, ct);
             }
 
             _jobStatusLogger.LogWithStatus(
@@ -76,7 +78,7 @@ namespace Geta.Optimizely.ProductFeed
                         throw new InvalidOperationException($"Field converter for `{feedDescriptor.Name}` feed is not configured");
                     }
 
-                    var result = converter.Convert(feedSourceData, feedDescriptor);
+                    var result = converter.Convert(feedSourceData, feedDescriptor, ct);
 
                     _feedRepository.Save(result);
 

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using EPiServer;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
@@ -26,7 +27,7 @@ namespace Geta.Optimizely.ProductFeed
             _languageAccessor = languageAccessor;
         }
 
-        public ICollection<CatalogContentBase> LoadSourceData()
+        public ICollection<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
         {
             var catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
             var items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();

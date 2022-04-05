@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google.Models;
@@ -22,7 +23,8 @@ namespace Geta.Optimizely.ProductFeed.Google
 
         public ICollection<FeedEntity> Convert(
             ICollection<CatalogContentBase> sourceData,
-            FeedDescriptor feedDescriptor)
+            FeedDescriptor feedDescriptor,
+            CancellationToken cancellationToken)
         {
             var generatedFeeds = new List<Feed>();
             var mapper = _mapperFactory(feedDescriptor.Mapper);
