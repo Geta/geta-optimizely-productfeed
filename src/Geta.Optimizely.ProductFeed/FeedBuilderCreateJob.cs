@@ -75,9 +75,9 @@ namespace Geta.Optimizely.ProductFeed
                 {
                     _feedRepository.Save(converter.Export(_cts.Token));
 
-                    if (converter is IDisposable)
+                    if (converter is IDisposable disposable)
                     {
-                        ((IDisposable)converter).Dispose();
+                        disposable.Dispose();
                     }
                 }
 
