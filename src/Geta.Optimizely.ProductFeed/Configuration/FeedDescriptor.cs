@@ -20,13 +20,13 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public string MimeType { get; }
 
-        public Type Converter { get; private set; }
+        public Type Exporter { get; private set; }
 
-        public Type Mapper { get; protected set; }
+        public Type Converter { get; protected set; }
 
-        public void SetConverter<TConverter>() where TConverter : IProductFeedContentConverter
+        public void SetExporter<TExporter>() where TExporter : IProductFeedContentExporter
         {
-            Converter = typeof(TConverter);
+            Exporter = typeof(TExporter);
         }
     }
 }

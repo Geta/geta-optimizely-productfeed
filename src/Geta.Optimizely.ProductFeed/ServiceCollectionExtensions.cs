@@ -24,8 +24,20 @@ namespace Geta.Optimizely.ProductFeed
             services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
             services.AddTransient<IProductFeedContentEnricher, DefaultIProductFeedContentEnricher>();
 
-            services.AddSingleton<Func<Type, IProductFeedContentConverter>>(
-                provider => t => provider.GetRequiredService(t) as IProductFeedContentConverter);
+            services.AddSingleton<Func<FeedDescriptor, IProductFeedContentExporter>>(
+                provider => d =>
+                {
+                    var converter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter;
+                    var mapper = provider.GetRequiredService(d.Converter) as IProductFeedConverter;
+
+                    if (converter != null && mapper != null)
+                    {
+                        converter.SetDescriptor(d);
+                        converter.SetConverter(mapper);
+                    }
+
+                    return converter;
+                });
 
             services.AddTransient<IFeedRepository, FeedRepository>();
             services.AddTransient(provider =>

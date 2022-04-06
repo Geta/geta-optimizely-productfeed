@@ -27,12 +27,12 @@ namespace Geta.Optimizely.ProductFeed
             _languageAccessor = languageAccessor;
         }
 
-        public ICollection<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
+        public IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
         {
             var catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
             var items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
 
-            return items.ToList();
+            return items;
         }
 
         private LoaderOptions CreateDefaultLoadOption()

@@ -10,19 +10,20 @@ using EPiServer.Reference.Commerce.Site.Features.Product.Models;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Extensions;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Services;
 using EPiServer.Web;
+using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Configuration;
-using Geta.Optimizely.ProductFeed.Google;
 using Geta.Optimizely.ProductFeed.Google.Models;
+using Geta.Optimizely.ProductFeed.Models;
 
 namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
 {
-    public class FeedEntityMapper : IProductFeedEntityMapper
+    public class FeedConverter : IProductFeedConverter
     {
         private readonly IContentLoader _contentLoader;
         private readonly IPricingService _pricingService;
         private readonly string _siteUrl;
 
-        public FeedEntityMapper(
+        public FeedConverter(
             IContentLoader contentLoader,
             IPricingService pricingService,
             ISiteDefinitionRepository siteDefinitionRepository)
@@ -32,7 +33,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        public Feed GenerateFeedEntity(FeedDescriptor feedDescriptor)
+        public IFeed CreateFeed(FeedDescriptor feedDescriptor)
         {
             return new Feed
             {
@@ -42,7 +43,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
             };
         }
 
-        public Entry GenerateEntry(CatalogContentBase catalogContent)
+        public IFeedEntry Convert(CatalogContentBase catalogContent)
         {
             var variationContent = catalogContent as FashionVariant;
             if (variationContent == null)

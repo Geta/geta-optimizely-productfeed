@@ -9,6 +9,6 @@ namespace Geta.Optimizely.ProductFeed
 {
     public interface IProductFeedContentLoader
     {
-        ICollection<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken);
+        IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken);
     }
 }

@@ -4,16 +4,14 @@
 using System.Collections.Generic;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
-using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    public interface IProductFeedContentConverter
+    public interface IProductFeedContentExporter
     {
-        ICollection<FeedEntity> Convert(
-            ICollection<CatalogContentBase> sourceData,
-            FeedDescriptor feedDescriptor,
-            CancellationToken cancellationToken);
+        ICollection<FeedEntity> Export(CancellationToken cancellationToken);
+
+        void ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken);
     }
 }

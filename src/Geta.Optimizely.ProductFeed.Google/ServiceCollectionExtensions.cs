@@ -13,20 +13,17 @@ namespace Geta.Optimizely.ProductFeed.Google
             this IServiceCollection services,
             Action<GoogleFeedDescriptor> setupAction)
         {
-            services.AddTransient<GoogleProductFeedConverter>();
+            services.AddTransient<GoogleProductFeedExporter>();
 
             var descriptor = new GoogleFeedDescriptor();
             setupAction(descriptor);
 
-            services.AddSingleton<Func<Type, IProductFeedEntityMapper>>(
-                provider => t => provider.GetRequiredService(t) as IProductFeedEntityMapper);
-
-            if (descriptor.Mapper == null)
+            if (descriptor.Converter == null)
             {
-                throw new InvalidOperationException("Google ProductFeed mapper is not set. Use `GoogleFeedDescriptor.SetMapper<T>` method to do so.");
+                throw new InvalidOperationException("Google ProductFeed mapper is not set. Use `GoogleFeedDescriptor.SetExporter<T>` method to do so.");
             }
 
-            services.AddTransient(descriptor.Mapper);
+            services.AddTransient(descriptor.Converter);
             services.AddSingleton<FeedDescriptor>(descriptor);
 
             return services;

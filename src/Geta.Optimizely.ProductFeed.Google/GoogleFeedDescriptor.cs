@@ -7,14 +7,12 @@ namespace Geta.Optimizely.ProductFeed.Google
 {
     public class GoogleFeedDescriptor : FeedDescriptor
     {
-        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml")
-        {
-            SetConverter<GoogleProductFeedConverter>();
-        }
+        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml") =>
+            SetExporter<GoogleProductFeedExporter>();
 
-        public void SetMapper<TMapper>() where TMapper : IProductFeedEntityMapper
+        public void SetConverter<TConverter>() where TConverter : IProductFeedConverter
         {
-            Mapper = typeof(TMapper);
+            Converter = typeof(TConverter);
         }
     }
 }

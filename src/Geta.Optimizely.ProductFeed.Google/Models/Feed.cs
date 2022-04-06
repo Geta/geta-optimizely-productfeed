@@ -4,12 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Google.Models
 {
     [XmlRoot("feed")]
     [Serializable]
-    public class Feed
+    public class Feed : IFeed
     {
         [XmlElement("title")]
         public string Title { get; set; }

@@ -9,7 +9,6 @@ using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Repositories;
-using Microsoft.Extensions.Logging;
 
 namespace Geta.Optimizely.ProductFeed
 {
@@ -22,25 +21,22 @@ namespace Geta.Optimizely.ProductFeed
         private readonly IProductFeedContentLoader _feedContentLoader;
         private readonly IEnumerable<IProductFeedContentEnricher> _enrichers;
         private readonly IEnumerable<FeedDescriptor> _feedDescriptors;
-        private readonly Func<Type, IProductFeedContentConverter> _converterFactory;
+        private readonly Func<FeedDescriptor, IProductFeedContentExporter> _converterFactory;
         private readonly IFeedRepository _feedRepository;
-        private readonly ILogger<FeedBuilderCreateJob> _logger;
         private readonly JobStatusLogger _jobStatusLogger;
-        private bool _stopped;
+        private readonly CancellationTokenSource _cts = new ();
 
         public FeedBuilderCreateJob(IProductFeedContentLoader feedContentLoader,
             IEnumerable<IProductFeedContentEnricher> enrichers,
             IEnumerable<FeedDescriptor> feedDescriptors,
-            Func<Type, IProductFeedContentConverter> converterFactory,
-            IFeedRepository feedRepository,
-            ILogger<FeedBuilderCreateJob> logger)
+            Func<FeedDescriptor, IProductFeedContentExporter> converterFactory,
+            IFeedRepository feedRepository)
         {
             _feedContentLoader = feedContentLoader;
             _enrichers = enrichers;
             _feedDescriptors = feedDescriptors;
             _converterFactory = converterFactory;
             _feedRepository = feedRepository;
-            _logger = logger;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -48,59 +44,59 @@ namespace Geta.Optimizely.ProductFeed
 
         public override string Execute()
         {
-            var ct = CancellationToken.None;
-            var feedSourceData = _feedContentLoader.LoadSourceData(ct);
-            var successCount = 0;
-
-            foreach (var enricher in _enrichers)
+            try
             {
-                enricher.Enrich(feedSourceData, ct);
-            }
+                var converters = _feedDescriptors
+                    .Select(d => _converterFactory(d))
+                    .ToList();
 
-            _jobStatusLogger.LogWithStatus(
-                $"Found {_feedDescriptors.Count()} ({string.Join(", ", _feedDescriptors.Select(f => f.Name))}) feeds. Build process starting...");
-
-            foreach (var feedDescriptor in _feedDescriptors)
-            {
-                if (_stopped)
-                {
-                    _jobStatusLogger.Log("Job was stopped");
-                    return _jobStatusLogger.ToString();
-                }
-
-                _jobStatusLogger.LogWithStatus($"Building {feedDescriptor.Name} feed...");
-
-                try
-                {
-                    var converter = _converterFactory(feedDescriptor.Converter);
-                    if (converter == null)
+                var sourceData = _feedContentLoader
+                    .LoadSourceData(_cts.Token)
+                    .Select(d =>
                     {
-                        throw new InvalidOperationException($"Field converter for `{feedDescriptor.Name}` feed is not configured");
-                    }
+                        foreach (var enricher in _enrichers)
+                        {
+                            enricher.Enrich(d, _cts.Token);
+                        }
 
-                    var result = converter.Convert(feedSourceData, feedDescriptor, ct);
+                        return d;
+                    });
 
-                    _feedRepository.Save(result);
-
-                    successCount++;
-                }
-                catch (Exception ex)
+                foreach (var d in sourceData)
                 {
-                    _jobStatusLogger.LogWithStatus($"Failed to build `{feedDescriptor.Name}` product feed. Exception: {ex}");
-
-                    // save to technical log file as well
-                    _logger.LogError(ex, $"Failed to build `{feedDescriptor.Name}` product feed");
+                    foreach (var converter in converters)
+                    {
+                        converter.ConvertEntry(d, _cts.Token);
+                    }
                 }
+
+                // dispose exporters - so we let them flush and wrap-up
+                foreach (var converter in converters)
+                {
+                    _feedRepository.Save(converter.Export(_cts.Token));
+
+                    if (converter is IDisposable)
+                    {
+                        ((IDisposable)converter).Dispose();
+                    }
+                }
+
+                _jobStatusLogger.LogWithStatus(
+                    $"Found {_feedDescriptors.Count()} ({string.Join(", ", _feedDescriptors.Select(f => f.Name))}) feeds. Build process starting...");
+            }
+            catch (Exception ex)
+            {
+                _jobStatusLogger.Log($"Error occurred. {ex}");
             }
 
-            _jobStatusLogger.LogWithStatus($"Job executed. Feeds {successCount} out of {_feedDescriptors.Count()} created and saved to the storage.");
+            _jobStatusLogger.LogWithStatus("Job finished.");
 
             return _jobStatusLogger.ToString();
         }
 
         public override void Stop()
         {
-            _stopped = true;
+            _cts.Cancel();
         }
     }
 }

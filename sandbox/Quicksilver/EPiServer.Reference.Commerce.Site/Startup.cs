@@ -120,10 +120,13 @@ namespace EPiServer.Reference.Commerce.Site
             });
 
             services
-                .AddProductFeed(x => { x.ConnectionString = _configuration.GetConnectionString("EPiServerDB"); })
+                .AddProductFeed(x =>
+                {
+                    x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                })
                 .AddGoogleProductFeed(descriptor =>
                 {
-                    descriptor.SetMapper<FeedEntityMapper>();
+                    descriptor.SetConverter<FeedConverter>();
                 });
         }
 

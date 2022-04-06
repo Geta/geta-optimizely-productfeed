@@ -12,10 +12,10 @@ namespace Geta.Optimizely.ProductFeed.Google
     {
         public static byte[] Serialize(object value, Type type)
         {
+            var serializer = new XmlSerializer(type, "http://www.w3.org/2005/Atom");
+
             var namespaces = new XmlSerializerNamespaces();
             namespaces.Add("g", "http://base.google.com/ns/1.0");
-
-            var serializer = new XmlSerializer(type, "http://www.w3.org/2005/Atom");
 
             using var stringWriter = new EncodedStringWriter(Encoding.UTF8);
             using var xmlWriter = new XmlTextWriter(stringWriter);
