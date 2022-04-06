@@ -7,26 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
-    public static class ServiceCollectionExtensions
+    public static class ProductFeedOptionsExtensions
     {
-        public static IServiceCollection AddGoogleProductFeed(
-            this IServiceCollection services,
-            Action<GoogleFeedDescriptor> setupAction)
+        public static ProductFeedOptions AddGoogleExport(
+            this ProductFeedOptions options,
+            Action<FeedDescriptor> setupAction)
         {
-            services.AddTransient<GoogleProductFeedExporter>();
-
             var descriptor = new GoogleFeedDescriptor();
             setupAction(descriptor);
+            options.Add(descriptor);
 
-            if (descriptor.Converter == null)
-            {
-                throw new InvalidOperationException("Google ProductFeed mapper is not set. Use `GoogleFeedDescriptor.SetExporter<T>` method to do so.");
-            }
-
-            services.AddTransient(descriptor.Converter);
-            services.AddSingleton<FeedDescriptor>(descriptor);
-
-            return services;
+            return options;
         }
     }
 }

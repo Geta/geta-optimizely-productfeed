@@ -26,6 +26,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using EPiServer.Reference.Commerce.Site.Features.CsvFeed;
 using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Configuration;
@@ -123,10 +124,18 @@ namespace EPiServer.Reference.Commerce.Site
                 .AddProductFeed(x =>
                 {
                     x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
-                })
-                .AddGoogleProductFeed(descriptor =>
-                {
-                    descriptor.SetConverter<FeedConverter>();
+
+                    x.AddGoogleExport(d =>
+                    {
+                        d.FileName = "/google-feed";
+                        d.SetConverter<GoogleFeedConverter>();
+                    });
+
+                    var csvFeed = new FeedDescriptor("csv", "csv-feed", "text/plain");
+                    csvFeed.SetConverter<CsvConverter>();
+                    csvFeed.SetExporter<CsvExporter>();
+
+                    x.Add(csvFeed);
                 });
         }
 

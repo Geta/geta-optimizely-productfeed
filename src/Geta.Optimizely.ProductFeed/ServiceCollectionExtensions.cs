@@ -27,16 +27,16 @@ namespace Geta.Optimizely.ProductFeed
             services.AddSingleton<Func<FeedDescriptor, IProductFeedContentExporter>>(
                 provider => d =>
                 {
-                    var converter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter;
-                    var mapper = provider.GetRequiredService(d.Converter) as IProductFeedConverter;
+                    var exporter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter;
+                    var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter;
 
-                    if (converter != null && mapper != null)
+                    if (exporter != null && converter != null)
                     {
-                        converter.SetDescriptor(d);
-                        converter.SetConverter(mapper);
+                        exporter.SetDescriptor(d);
+                        exporter.SetConverter(converter);
                     }
 
-                    return converter;
+                    return exporter;
                 });
 
             services.AddTransient<IFeedRepository, FeedRepository>();
@@ -44,8 +44,17 @@ namespace Geta.Optimizely.ProductFeed
                                       new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
 
             services.AddTransient<FeedBuilderCreateJob>();
-
             services.AddHostedService<MigrationService>();
+
+            var config = new ProductFeedOptions();
+            setupAction(config);
+
+            foreach (var descriptor in config.Descriptors)
+            {
+                services.AddSingleton(descriptor);
+                services.AddTransient(descriptor.Converter);
+                services.AddTransient(descriptor.Exporter);
+            }
 
             services.AddOptions<ProductFeedOptions>()
                 .Configure<IConfiguration>((options, configuration) =>

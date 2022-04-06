@@ -10,8 +10,8 @@ namespace Geta.Optimizely.ProductFeed
 {
     public interface IProductFeedContentExporter
     {
-        ICollection<FeedEntity> Export(CancellationToken cancellationToken);
-
         void ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken);
+
+        ICollection<FeedEntity> Export(CancellationToken cancellationToken);
     }
 }
