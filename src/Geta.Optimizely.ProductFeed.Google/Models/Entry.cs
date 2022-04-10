@@ -4,13 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Google.Models
 {
     [XmlType(TypeName = "entry")]
     [Serializable]
-    public class Entry : IFeedEntry
+    public class Entry
     {
         #region Basic product data
 

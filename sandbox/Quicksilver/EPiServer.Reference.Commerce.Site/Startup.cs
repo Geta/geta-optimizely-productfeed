@@ -134,6 +134,7 @@ namespace EPiServer.Reference.Commerce.Site
                     var csvFeed = new FeedDescriptor("csv", "csv-feed", "text/plain");
                     csvFeed.SetConverter<CsvConverter>();
                     csvFeed.SetExporter<CsvExporter>();
+                    csvFeed.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
 
                     x.Add(csvFeed);
                 });

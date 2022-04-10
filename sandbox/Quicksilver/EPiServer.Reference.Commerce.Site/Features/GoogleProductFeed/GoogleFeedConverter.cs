@@ -11,9 +11,7 @@ using EPiServer.Reference.Commerce.Site.Features.Shared.Extensions;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Services;
 using EPiServer.Web;
 using Geta.Optimizely.ProductFeed;
-using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google.Models;
-using Geta.Optimizely.ProductFeed.Models;
 
 namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
 {
@@ -33,17 +31,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        public IFeed CreateFeed(FeedDescriptor feedDescriptor)
-        {
-            return new Feed
-            {
-                Updated = DateTime.UtcNow,
-                Title = "My products",
-                Link = _siteUrl.TrimEnd('/') + '/' + feedDescriptor.FileName.TrimStart('/')
-            };
-        }
-
-        public IFeedEntry Convert(CatalogContentBase catalogContent)
+        public object Convert(CatalogContentBase catalogContent)
         {
             var variationContent = catalogContent as FashionVariant;
             if (variationContent == null)

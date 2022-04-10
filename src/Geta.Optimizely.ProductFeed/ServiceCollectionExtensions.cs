@@ -24,16 +24,18 @@ namespace Geta.Optimizely.ProductFeed
             services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
             services.AddTransient<IProductFeedContentEnricher, DefaultIProductFeedContentEnricher>();
 
-            services.AddSingleton<Func<FeedDescriptor, IProductFeedContentExporter>>(
+            services.AddSingleton<Func<FeedDescriptor, AbstractFeedContentExporter>>(
                 provider => d =>
                 {
                     var exporter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter;
                     var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter;
+                    var siteUrlBuilder = provider.GetRequiredService(d.SiteUrlBuilder) as ISiteUrlBuilder;
 
-                    if (exporter != null && converter != null)
+                    if (exporter != null && converter != null && siteUrlBuilder != null)
                     {
                         exporter.SetDescriptor(d);
                         exporter.SetConverter(converter);
+                        exporter.SetSiteUrlBuilder(siteUrlBuilder);
                     }
 
                     return exporter;
@@ -54,6 +56,7 @@ namespace Geta.Optimizely.ProductFeed
                 services.AddSingleton(descriptor);
                 services.AddTransient(descriptor.Converter);
                 services.AddTransient(descriptor.Exporter);
+                services.AddTransient(descriptor.SiteUrlBuilder);
             }
 
             services.AddOptions<ProductFeedOptions>()

@@ -24,6 +24,8 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public Type Converter { get; protected set; }
 
+        public Type SiteUrlBuilder { get; protected set; }
+
         public void SetExporter<TExporter>() where TExporter : AbstractFeedContentExporter
         {
             Exporter = typeof(TExporter);
@@ -32,6 +34,11 @@ namespace Geta.Optimizely.ProductFeed.Configuration
         public void SetConverter<TConverter>() where TConverter : IProductFeedConverter
         {
             Converter = typeof(TConverter);
+        }
+
+        public void SetSiteUrlBuilder<TBuilder>() where TBuilder : ISiteUrlBuilder
+        {
+            SiteUrlBuilder = typeof(TBuilder);
         }
     }
 }

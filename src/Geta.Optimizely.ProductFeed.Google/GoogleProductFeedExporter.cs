@@ -1,7 +1,9 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Google.Models;
@@ -13,12 +15,17 @@ namespace Geta.Optimizely.ProductFeed.Google
     {
         private readonly List<Entry> _entries = new();
 
-        public override ICollection<FeedEntity> Export(CancellationToken cancellationToken)
+        public override ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var f = (Feed)Converter.CreateFeed(Descriptor);
-            f.Entries = _entries;
+            var f = new Feed
+            {
+                Updated = DateTime.UtcNow,
+                Title = "Google Product Feed",
+                Link = SiteUrlBuilder.BuildUrl().TrimEnd('/') + '/' + Descriptor.FileName.TrimStart('/'),
+                Entries = _entries.Where(e => e != null).ToList()
+            };
 
             return new[]
             {
@@ -29,10 +36,19 @@ namespace Geta.Optimizely.ProductFeed.Google
             };
         }
 
-        public override void ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
+        public override object ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            _entries.Add((Entry)Converter.Convert(catalogContentBase));
+            var entry = (Entry)Converter.Convert(catalogContentBase);
+
+            _entries.Add(entry);
+
+            return null;
+        }
+
+        public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
+        {
+            return Array.Empty<byte>();
         }
     }
 }

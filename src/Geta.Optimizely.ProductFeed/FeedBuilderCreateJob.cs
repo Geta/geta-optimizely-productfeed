@@ -21,7 +21,7 @@ namespace Geta.Optimizely.ProductFeed
         private readonly IProductFeedContentLoader _feedContentLoader;
         private readonly IEnumerable<IProductFeedContentEnricher> _enrichers;
         private readonly IEnumerable<FeedDescriptor> _feedDescriptors;
-        private readonly Func<FeedDescriptor, IProductFeedContentExporter> _converterFactory;
+        private readonly Func<FeedDescriptor, AbstractFeedContentExporter> _converterFactory;
         private readonly IFeedRepository _feedRepository;
         private readonly JobStatusLogger _jobStatusLogger;
         private readonly CancellationTokenSource _cts = new ();
@@ -29,7 +29,7 @@ namespace Geta.Optimizely.ProductFeed
         public FeedBuilderCreateJob(IProductFeedContentLoader feedContentLoader,
             IEnumerable<IProductFeedContentEnricher> enrichers,
             IEnumerable<FeedDescriptor> feedDescriptors,
-            Func<FeedDescriptor, IProductFeedContentExporter> converterFactory,
+            Func<FeedDescriptor, AbstractFeedContentExporter> converterFactory,
             IFeedRepository feedRepository)
         {
             _feedContentLoader = feedContentLoader;
@@ -62,18 +62,25 @@ namespace Geta.Optimizely.ProductFeed
                         return d;
                     });
 
+                // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
+                // render document start tag or do some other magic
+                foreach (var converter in converters)
+                {
+                    converter.BeginExport(_cts.Token);
+                }
+
                 foreach (var d in sourceData)
                 {
                     foreach (var converter in converters)
                     {
-                        converter.ConvertEntry(d, _cts.Token);
+                        converter.BuildEntry(d, _cts.Token);
                     }
                 }
 
                 // dispose exporters - so we let them flush and wrap-up
                 foreach (var converter in converters)
                 {
-                    _feedRepository.Save(converter.Export(_cts.Token));
+                    _feedRepository.Save(converter.FinishExport(_cts.Token));
 
                     if (converter is IDisposable disposable)
                     {

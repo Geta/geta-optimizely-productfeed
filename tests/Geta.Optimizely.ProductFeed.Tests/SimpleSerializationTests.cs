@@ -3,10 +3,8 @@ using System.Linq;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Reference.Commerce.Site.Features.Product.Models;
-using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google;
 using Geta.Optimizely.ProductFeed.Google.Models;
-using Geta.Optimizely.ProductFeed.Models;
 using Xunit;
 
 namespace Geta.Optimizely.ProductFeed.Tests;
@@ -22,7 +20,7 @@ public class SimpleSerializationTests
         gc.SetConverter(new FeedConverter());
 
         var enrichers = new List<IProductFeedContentEnricher> { new BrandEnricher2(), new BrandEnricher1() };
-        var converters = new List<IProductFeedContentExporter> { gc };
+        var converters = new List<AbstractFeedContentExporter> { gc };
 
         var sourceData = LoadSourceData()
             .Select(d =>
@@ -43,7 +41,7 @@ public class SimpleSerializationTests
             }
         }
 
-        var result = gc.Export(_cts.Token);
+        var result = gc.FinishExport(_cts.Token);
 
         Assert.NotNull(result);
     }
@@ -59,12 +57,7 @@ public class SimpleSerializationTests
 
 public class FeedConverter : IProductFeedConverter
 {
-    public IFeed CreateFeed(FeedDescriptor feedDescriptor)
-    {
-        return new Feed();
-    }
-
-    public IFeedEntry Convert(CatalogContentBase catalogContent)
+    public object Convert(CatalogContentBase catalogContent)
     {
         return new Entry();
     }
@@ -74,7 +67,8 @@ public class BrandEnricher2 : IProductFeedContentEnricher
 {
     public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
     {
-        ((FashionProduct)sourceData).Brand = "brand 1";
+        var fashionProduct = (FashionProduct)sourceData;
+        fashionProduct.Brand = $"brand {fashionProduct.Code}";
 
         return sourceData;
     }

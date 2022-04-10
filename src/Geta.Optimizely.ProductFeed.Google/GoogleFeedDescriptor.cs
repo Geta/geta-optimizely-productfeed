@@ -7,7 +7,6 @@ namespace Geta.Optimizely.ProductFeed.Google
 {
     public class GoogleFeedDescriptor : FeedDescriptor
     {
-        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml") =>
-            SetExporter<GoogleProductFeedExporter>();
+        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml") { }
     }
 }

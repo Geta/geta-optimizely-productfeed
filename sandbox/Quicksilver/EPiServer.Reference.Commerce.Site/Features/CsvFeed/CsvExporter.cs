@@ -1,61 +1,62 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
+using CsvHelper;
+using CsvHelper.Configuration;
 using EPiServer.Commerce.Catalog.ContentTypes;
-using EPiServer.Web;
+using EPiServer.Reference.Commerce.Site.Features.Product.Models;
 using Geta.Optimizely.ProductFeed;
-using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
 namespace EPiServer.Reference.Commerce.Site.Features.CsvFeed
 {
     public class CsvExporter : AbstractFeedContentExporter
     {
-        private readonly MemoryStream _ms;
-        private readonly string _siteUrl;
+        private readonly CsvWriter _writer;
 
-        public CsvExporter(ISiteDefinitionRepository siteDefinitionRepository)
+        public CsvExporter()
         {
-            _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
-            _ms = new MemoryStream();
+            _writer = new CsvWriter(new StreamWriter(Buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
         }
 
-        public override ICollection<FeedEntity> Export(CancellationToken cancellationToken)
+        public override void BeginExport(CancellationToken cancellationToken)
         {
-            return new[]
-            {
-                new FeedEntity
-                {
-                    CreatedUtc = DateTime.UtcNow,
-                    Link = _siteUrl.TrimEnd('/') + '/' + "csv-feed",
-                    FeedBytes = _ms.ToArray()
-                }
-            };
+            _writer.WriteHeader<CsvEntry>();
+            _writer.NextRecord();
         }
 
-        public override void ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
+        public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
         {
-            if (Converter.Convert(catalogContentBase) is CsvEntry e)
-            {
-                _ms.Write(Encoding.UTF8.GetBytes($"{e.Code}\t{e.Price}"));
-            }
+            _writer.WriteRecord(value);
+            _writer.NextRecord();
+
+            return Array.Empty<byte>();
+        }
+
+        public override ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
+        {
+            _writer.Flush();
+
+            return base.FinishExport(cancellationToken);
+        }
+
+        public override object ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
+        {
+            return Converter.Convert(catalogContentBase);
         }
     }
 
     public class CsvConverter : IProductFeedConverter
     {
-        public IFeed CreateFeed(FeedDescriptor feedDescriptor) { throw new NotImplementedException(); }
-
-        public IFeedEntry Convert(CatalogContentBase catalogContent)
+        public object Convert(CatalogContentBase catalogContent)
         {
-            return new CsvEntry { Code = catalogContent.Name, Price = 1.0M };
+            return catalogContent is not FashionProduct ? null : new CsvEntry { Code = catalogContent.Name, Price = 1.0M };
         }
     }
 
-    public class CsvEntry : IFeedEntry
+    public class CsvEntry
     {
         public string Code { get; set; }
         public decimal Price { get; set; }

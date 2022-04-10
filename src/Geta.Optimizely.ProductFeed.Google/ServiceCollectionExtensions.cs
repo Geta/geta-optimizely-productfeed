@@ -3,7 +3,6 @@
 
 using System;
 using Geta.Optimizely.ProductFeed.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
@@ -14,6 +13,10 @@ namespace Geta.Optimizely.ProductFeed.Google
             Action<FeedDescriptor> setupAction)
         {
             var descriptor = new GoogleFeedDescriptor();
+
+            descriptor.SetExporter<GoogleProductFeedExporter>();
+            descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
+
             setupAction(descriptor);
             options.Add(descriptor);
 
