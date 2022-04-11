@@ -6,12 +6,12 @@ using EPiServer.Commerce.Catalog.ContentTypes;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    public interface IProductFeedContentEnricher
+    public interface IProductFeedContentEnricher<T>
     {
-        CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken);
+        T Enrich(T sourceData, CancellationToken cancellationToken);
     }
 
-    internal class DefaultIProductFeedContentEnricher : IProductFeedContentEnricher
+    internal class DefaultIProductFeedContentEnricher : IProductFeedContentEnricher<CatalogContentBase>
     {
         public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
         {

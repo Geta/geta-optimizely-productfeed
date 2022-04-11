@@ -11,7 +11,7 @@ using Mediachase.Commerce.Catalog;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    public class DefaultProductFeedContentLoader : IProductFeedContentLoader
+    public class DefaultProductFeedContentLoader : IProductFeedContentLoader<CatalogContentBase>
     {
         private readonly IContentLoader _contentLoader;
         private readonly IContentLanguageAccessor _languageAccessor;

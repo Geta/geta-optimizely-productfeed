@@ -1,10 +1,8 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 // TODO: test namespace change
 namespace Geta.Optimizely.GoogleProductFeed.Repositories
@@ -13,20 +11,20 @@ namespace Geta.Optimizely.GoogleProductFeed.Repositories
     {
         private readonly string _connectionString;
 
-        public FeedApplicationDbContext(IOptions<ProductFeedOptions> options)
+        public FeedApplicationDbContext(string connectionString)
         {
-            _connectionString = options.Value.ConnectionString;
+            _connectionString = connectionString;
         }
 
         public FeedApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (options.IsConfigured) return;
+            if (optionsBuilder.IsConfigured) return;
 
-            options.UseSqlServer(_connectionString);
+            optionsBuilder.UseSqlServer(_connectionString);
         }
 
         public DbSet<FeedEntity> FeedData { get; set; }

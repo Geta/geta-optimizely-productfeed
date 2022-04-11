@@ -20,25 +20,42 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public string MimeType { get; set; }
 
-        public Type Exporter { get; private set; }
+        public Type Exporter { get; set; }
 
-        public Type Converter { get; protected set; }
+        public Type Converter { get; set; }
 
-        public Type SiteUrlBuilder { get; protected set; }
+        public Type SiteUrlBuilder { get; set; }
 
-        public void SetExporter<TExporter>() where TExporter : AbstractFeedContentExporter
-        {
-            Exporter = typeof(TExporter);
-        }
+        //public void SetExporter<TExporter>() where TExporter : AbstractFeedContentExporter<TEntity>
+        //{
+        //    Exporter = typeof(TExporter);
+        //}
 
-        public void SetConverter<TConverter>() where TConverter : IProductFeedConverter
-        {
-            Converter = typeof(TConverter);
-        }
+        //public void SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
+        //{
+        //    Converter = typeof(TConverter);
+        //}
 
         public void SetSiteUrlBuilder<TBuilder>() where TBuilder : ISiteUrlBuilder
         {
             SiteUrlBuilder = typeof(TBuilder);
         }
+    }
+
+    public static class FeedDescriptorExtensions
+    {
+        public static FeedDescriptor SetExporter<TExporter, TEntity>(this FeedDescriptor descriptor)
+            where TExporter : AbstractFeedContentExporter<TEntity>
+        {
+            descriptor.Exporter = typeof(TExporter);
+            return descriptor;
+        }
+
+        //public static FeedDescriptor SetConverter<TConverter, TEntity>(this FeedDescriptor descriptor)
+        //    where TConverter : IProductFeedConverter<TEntity>
+        //{
+        //    descriptor.Converter = typeof(TConverter);
+        //    return descriptor;
+        //}
     }
 }

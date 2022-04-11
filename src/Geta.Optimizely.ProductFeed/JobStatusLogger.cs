@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    internal class JobStatusLogger
+    public class JobStatusLogger
     {
         private readonly Action<string> _onStatusChanged;
 

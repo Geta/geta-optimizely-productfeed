@@ -8,13 +8,13 @@ namespace Geta.Optimizely.ProductFeed.Google
 {
     public static class ProductFeedOptionsExtensions
     {
-        public static ProductFeedOptions AddGoogleExport(
-            this ProductFeedOptions options,
-            Action<FeedDescriptor> setupAction)
+        public static ProductFeedOptions<TEntity> AddGoogleXmlExport<TEntity>(
+            this ProductFeedOptions<TEntity> options,
+            Action<GoogleFeedDescriptor<TEntity>> setupAction)
         {
-            var descriptor = new GoogleFeedDescriptor();
+            var descriptor = new GoogleFeedDescriptor<TEntity>();
 
-            descriptor.SetExporter<GoogleProductFeedExporter>();
+            descriptor.SetExporter<GoogleProductFeedExporter<TEntity>, TEntity>();
             descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
 
             setupAction(descriptor);

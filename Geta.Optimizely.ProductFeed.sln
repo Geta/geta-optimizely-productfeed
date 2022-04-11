@@ -24,7 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet.config = NuGet.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.Optimizely.ProductFeed.Tests", "tests\Geta.Optimizely.ProductFeed.Tests\Geta.Optimizely.ProductFeed.Tests.csproj", "{8F1B100B-D8AE-43D3-A2B5-2EFA9428DD95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Tests", "tests\Geta.Optimizely.ProductFeed.Tests\Geta.Optimizely.ProductFeed.Tests.csproj", "{8F1B100B-D8AE-43D3-A2B5-2EFA9428DD95}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Csv", "src\Geta.Optimizely.ProductFeed.Csv\Geta.Optimizely.ProductFeed.Csv.csproj", "{6787C1D8-6897-4350-8925-D3E3443EB82C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{8F1B100B-D8AE-43D3-A2B5-2EFA9428DD95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F1B100B-D8AE-43D3-A2B5-2EFA9428DD95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F1B100B-D8AE-43D3-A2B5-2EFA9428DD95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

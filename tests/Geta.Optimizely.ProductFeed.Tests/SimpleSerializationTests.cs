@@ -1,3 +1,6 @@
+// Copyright (c) Geta Digital. All rights reserved.
+// Licensed under Apache-2.0. See the LICENSE file in the project root for more information
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,11 +19,11 @@ public class SimpleSerializationTests
     [Fact]
     public void GenerateSimpleFeed()
     {
-        var gc = new GoogleProductFeedExporter();
+        var gc = new GoogleProductFeedExporter<CatalogContentBase>();
         gc.SetConverter(new FeedConverter());
 
-        var enrichers = new List<IProductFeedContentEnricher> { new BrandEnricher2(), new BrandEnricher1() };
-        var converters = new List<AbstractFeedContentExporter> { gc };
+        var enrichers = new List<IProductFeedContentEnricher<CatalogContentBase>> { new BrandEnricher2(), new BrandEnricher1() };
+        var converters = new List<AbstractFeedContentExporter<CatalogContentBase>> { gc };
 
         var sourceData = LoadSourceData()
             .Select(d =>
@@ -55,7 +58,7 @@ public class SimpleSerializationTests
     }
 }
 
-public class FeedConverter : IProductFeedConverter
+public class FeedConverter : IProductFeedConverter<CatalogContentBase>
 {
     public object Convert(CatalogContentBase catalogContent)
     {
@@ -63,7 +66,7 @@ public class FeedConverter : IProductFeedConverter
     }
 }
 
-public class BrandEnricher2 : IProductFeedContentEnricher
+public class BrandEnricher2 : IProductFeedContentEnricher<CatalogContentBase>
 {
     public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
     {
@@ -74,7 +77,7 @@ public class BrandEnricher2 : IProductFeedContentEnricher
     }
 }
 
-public class BrandEnricher1 : IProductFeedContentEnricher
+public class BrandEnricher1 : IProductFeedContentEnricher<CatalogContentBase>
 {
     public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
     {

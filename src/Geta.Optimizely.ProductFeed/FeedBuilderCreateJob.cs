@@ -2,13 +2,10 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
-using Geta.Optimizely.ProductFeed.Configuration;
-using Geta.Optimizely.ProductFeed.Repositories;
 
 namespace Geta.Optimizely.ProductFeed
 {
@@ -18,25 +15,13 @@ namespace Geta.Optimizely.ProductFeed
         Description = "Creates and stores product feeds")]
     public class FeedBuilderCreateJob : ScheduledJobBase
     {
-        private readonly IProductFeedContentLoader _feedContentLoader;
-        private readonly IEnumerable<IProductFeedContentEnricher> _enrichers;
-        private readonly IEnumerable<FeedDescriptor> _feedDescriptors;
-        private readonly Func<FeedDescriptor, AbstractFeedContentExporter> _converterFactory;
-        private readonly IFeedRepository _feedRepository;
+        private readonly ServiceFactory _serviceFactory;
         private readonly JobStatusLogger _jobStatusLogger;
         private readonly CancellationTokenSource _cts = new ();
 
-        public FeedBuilderCreateJob(IProductFeedContentLoader feedContentLoader,
-            IEnumerable<IProductFeedContentEnricher> enrichers,
-            IEnumerable<FeedDescriptor> feedDescriptors,
-            Func<FeedDescriptor, AbstractFeedContentExporter> converterFactory,
-            IFeedRepository feedRepository)
+        public FeedBuilderCreateJob(ServiceFactory serviceFactory)
         {
-            _feedContentLoader = feedContentLoader;
-            _enrichers = enrichers;
-            _feedDescriptors = feedDescriptors;
-            _converterFactory = converterFactory;
-            _feedRepository = feedRepository;
+            _serviceFactory = serviceFactory;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -46,50 +31,15 @@ namespace Geta.Optimizely.ProductFeed
         {
             try
             {
-                var converters = _feedDescriptors
-                    .Select(d => _converterFactory(d))
-                    .ToList();
+                var mappedType = typeof(CatalogContentBase);
+                var genericPipelineType = typeof(ProcessingPipeline<>).MakeGenericType(mappedType);
+                var genericPipeline = _serviceFactory(genericPipelineType);
+                var mi = genericPipelineType.GetMethod("Process");
 
-                var sourceData = _feedContentLoader
-                    .LoadSourceData(_cts.Token)
-                    .Select(d =>
-                    {
-                        foreach (var enricher in _enrichers)
-                        {
-                            enricher.Enrich(d, _cts.Token);
-                        }
-
-                        return d;
-                    });
-
-                // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
-                // render document start tag or do some other magic
-                foreach (var converter in converters)
+                if (mi != null)
                 {
-                    converter.BeginExport(_cts.Token);
+                    mi.Invoke(genericPipeline, new object[] { _jobStatusLogger, _cts.Token });
                 }
-
-                foreach (var d in sourceData)
-                {
-                    foreach (var converter in converters)
-                    {
-                        converter.BuildEntry(d, _cts.Token);
-                    }
-                }
-
-                // dispose exporters - so we let them flush and wrap-up
-                foreach (var converter in converters)
-                {
-                    _feedRepository.Save(converter.FinishExport(_cts.Token));
-
-                    if (converter is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-
-                _jobStatusLogger.LogWithStatus(
-                    $"Found {_feedDescriptors.Count()} ({string.Join(", ", _feedDescriptors.Select(f => f.Name))}) feeds. Build process starting...");
             }
             catch (Exception ex)
             {

@@ -11,11 +11,11 @@ using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    public abstract class AbstractFeedContentExporter
+    public abstract class AbstractFeedContentExporter<TEntity>
     {
         protected readonly MemoryStream Buffer = new();
 
-        public IProductFeedConverter Converter { get; private set; }
+        public IProductFeedConverter<TEntity> Converter { get; private set; }
 
         public ISiteUrlBuilder SiteUrlBuilder { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Geta.Optimizely.ProductFeed
 
         public virtual void BeginExport(CancellationToken cancellationToken) { }
 
-        public virtual void BuildEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
+        public virtual void BuildEntry(TEntity catalogContentBase, CancellationToken cancellationToken)
         {
             var entry = ConvertEntry(catalogContentBase, cancellationToken);
             if (entry == null)
@@ -40,7 +40,7 @@ namespace Geta.Optimizely.ProductFeed
 
         public abstract byte[] SerializeEntry(object value, CancellationToken cancellationToken);
 
-        public abstract object ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken);
+        public abstract object ConvertEntry(TEntity catalogContentBase, CancellationToken cancellationToken);
 
         public virtual ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
         {
@@ -55,7 +55,7 @@ namespace Geta.Optimizely.ProductFeed
             };
         }
 
-        public void SetConverter(IProductFeedConverter converter)
+        public void SetConverter(IProductFeedConverter<TEntity> converter)
         {
             Converter = converter;
         }

@@ -11,7 +11,7 @@ using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
-    public class GoogleProductFeedExporter : AbstractFeedContentExporter
+    public class GoogleProductFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
     {
         private readonly List<Entry> _entries = new();
 
@@ -36,7 +36,7 @@ namespace Geta.Optimizely.ProductFeed.Google
             };
         }
 
-        public override object ConvertEntry(CatalogContentBase catalogContentBase, CancellationToken cancellationToken)
+        public override object ConvertEntry(TEntity catalogContentBase, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var entry = (Entry)Converter.Convert(catalogContentBase);

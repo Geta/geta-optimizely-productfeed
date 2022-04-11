@@ -1,11 +1,11 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using J2N.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Geta.Optimizely.ProductFeed.Configuration
 {
-    public class ProductFeedOptions
+    public class ProductFeedOptions<TEntity>
     {
         public string ConnectionString { get; set; }
 

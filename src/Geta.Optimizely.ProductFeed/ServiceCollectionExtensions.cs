@@ -2,6 +2,8 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Collections.Generic;
+using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Repositories;
@@ -11,24 +13,36 @@ using Microsoft.Extensions.Options;
 
 namespace Geta.Optimizely.ProductFeed
 {
+
+    public delegate object ServiceFactory(Type serviceType);
+
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddProductFeed(
-            this IServiceCollection services)
+        public static IServiceCollection AddProductFeed<TEntity>(
+            this IServiceCollection services,
+            Action<ProductFeedOptions<TEntity>> setupAction)
         {
-            return services.AddProductFeed(_ => { });
-        }
+            services.AddTransient<ServiceFactory>(sp => sp.GetService);
 
-        public static IServiceCollection AddProductFeed(this IServiceCollection services, Action<ProductFeedOptions> setupAction)
-        {
-            services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
-            services.AddTransient<IProductFeedContentEnricher, DefaultIProductFeedContentEnricher>();
+            services.AddTransient(typeof(IProductFeedContentLoader<TEntity>), typeof(DefaultProductFeedContentLoader));
+            services.AddTransient(typeof(IProductFeedContentEnricher<TEntity>), typeof(DefaultIProductFeedContentEnricher));
+            services.AddTransient(typeof(ProcessingPipeline<TEntity>), typeof(ProcessingPipeline<TEntity>));
 
-            services.AddSingleton<Func<FeedDescriptor, AbstractFeedContentExporter>>(
+            services.AddTransient<IFeedRepository, FeedRepository>();
+            services.AddTransient(provider =>
+            {
+                var options = provider.GetRequiredService<IOptions<ProductFeedOptions<TEntity>>>();
+                return new FeedApplicationDbContext(options.Value.ConnectionString);
+            });
+
+            services.AddTransient<FeedBuilderCreateJob>();
+            services.AddHostedService<MigrationService>();
+
+            services.AddSingleton<Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>>>(
                 provider => d =>
                 {
-                    var exporter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter;
-                    var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter;
+                    var exporter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter<TEntity>;
+                    var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter<TEntity>;
                     var siteUrlBuilder = provider.GetRequiredService(d.SiteUrlBuilder) as ISiteUrlBuilder;
 
                     if (exporter != null && converter != null && siteUrlBuilder != null)
@@ -41,14 +55,7 @@ namespace Geta.Optimizely.ProductFeed
                     return exporter;
                 });
 
-            services.AddTransient<IFeedRepository, FeedRepository>();
-            services.AddTransient(provider =>
-                                      new FeedApplicationDbContext(provider.GetRequiredService<IOptions<ProductFeedOptions>>()));
-
-            services.AddTransient<FeedBuilderCreateJob>();
-            services.AddHostedService<MigrationService>();
-
-            var config = new ProductFeedOptions();
+            var config = new ProductFeedOptions<TEntity>();
             setupAction(config);
 
             foreach (var descriptor in config.Descriptors)
@@ -59,7 +66,7 @@ namespace Geta.Optimizely.ProductFeed
                 services.AddTransient(descriptor.SiteUrlBuilder);
             }
 
-            services.AddOptions<ProductFeedOptions>()
+            services.AddOptions<ProductFeedOptions<TEntity>>()
                 .Configure<IConfiguration>((options, configuration) =>
                 {
                     setupAction(options);
