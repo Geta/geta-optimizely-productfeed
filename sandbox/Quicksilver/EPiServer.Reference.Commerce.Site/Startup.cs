@@ -26,10 +26,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Reference.Commerce.Site.Features.CsvFeed;
 using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Configuration;
+using Geta.Optimizely.ProductFeed.Csv;
 using Geta.Optimizely.ProductFeed.Google;
 
 namespace EPiServer.Reference.Commerce.Site
@@ -121,22 +123,22 @@ namespace EPiServer.Reference.Commerce.Site
             });
 
             services
-                .AddProductFeed(x =>
+                .AddProductFeed<CatalogContentBase>(options =>
                 {
-                    x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    //options.AddEnricher<FashionProductAvailabilityEnricher>();
 
-                    x.AddGoogleExport(d =>
+                    options.AddGoogleXmlExport(d =>
                     {
                         d.FileName = "/google-feed";
-                        d.SetConverter<GoogleFeedConverter>();
+                        d.SetConverter<GoogleXmlConverter>();
                     });
 
-                    var csvFeed = new FeedDescriptor("csv", "csv-feed", "text/plain");
-                    csvFeed.SetConverter<CsvConverter>();
-                    csvFeed.SetExporter<CsvExporter>();
-                    csvFeed.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
-
-                    x.Add(csvFeed);
+                    options.AddCsvExport(d =>
+                    {
+                        d.FileName = "/csv-feed-1";
+                        d.SetConverter<CsvConverter>();
+                    });
                 });
         }
 

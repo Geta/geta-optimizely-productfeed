@@ -15,13 +15,13 @@ using Geta.Optimizely.ProductFeed.Google.Models;
 
 namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
 {
-    public class GoogleFeedConverter : IProductFeedConverter
+    public class GoogleXmlConverter : IProductFeedConverter<CatalogContentBase>
     {
         private readonly IContentLoader _contentLoader;
         private readonly IPricingService _pricingService;
         private readonly string _siteUrl;
 
-        public GoogleFeedConverter(
+        public GoogleXmlConverter(
             IContentLoader contentLoader,
             IPricingService pricingService,
             ISiteDefinitionRepository siteDefinitionRepository)

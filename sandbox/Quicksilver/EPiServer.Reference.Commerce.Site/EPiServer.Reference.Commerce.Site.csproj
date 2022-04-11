@@ -23,6 +23,7 @@
     <Content Remove="wwwroot\js\js\adyen.js" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Geta.Optimizely.ProductFeed.Csv\Geta.Optimizely.ProductFeed.Csv.csproj" />
     <ProjectReference Include="..\..\..\src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj" />
     <ProjectReference Include="..\..\..\src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
   </ItemGroup>
