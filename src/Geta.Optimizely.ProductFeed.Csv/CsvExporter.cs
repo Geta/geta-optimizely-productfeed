@@ -29,9 +29,9 @@ namespace Geta.Optimizely.ProductFeed.Csv
             _writer.NextRecord();
         }
 
-        public override object ConvertEntry(TEntity catalogContentBase, CancellationToken cancellationToken)
+        public override object ConvertEntry(TEntity entity, CancellationToken cancellationToken)
         {
-            return Converter.Convert(catalogContentBase);
+            return Converter.Convert(entity);
         }
 
         public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
@@ -52,6 +52,7 @@ namespace Geta.Optimizely.ProductFeed.Csv
 
     public class CsvEntry
     {
+        public string Name { get; set; }
         public string Code { get; set; }
         public decimal Price { get; set; }
     }

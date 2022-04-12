@@ -24,8 +24,8 @@ namespace Geta.Optimizely.ProductFeed
         {
             services.AddTransient<ServiceFactory>(sp => sp.GetService);
 
-            services.AddTransient(typeof(IProductFeedContentLoader<TEntity>), typeof(DefaultProductFeedContentLoader));
-            services.AddTransient(typeof(IProductFeedContentEnricher<TEntity>), typeof(DefaultIProductFeedContentEnricher));
+            services.AddTransient<IProductFeedContentLoader, DefaultProductFeedContentLoader>();
+            services.AddTransient(typeof(IProductFeedContentEnricher<TEntity>), typeof(DefaultIProductFeedContentEnricher<TEntity>));
             services.AddTransient(typeof(ProcessingPipeline<TEntity>), typeof(ProcessingPipeline<TEntity>));
 
             services.AddTransient<IFeedRepository, FeedRepository>();
@@ -57,6 +57,23 @@ namespace Geta.Optimizely.ProductFeed
 
             var config = new ProductFeedOptions<TEntity>();
             setupAction(config);
+
+            if (config.EntityMapper == null)
+            {
+                if (!typeof(TEntity).IsAssignableFrom(typeof(CatalogContentBase)))
+                {
+                    throw new InvalidOperationException("Entity mapper is not set");
+                }
+
+                services.AddTransient<IEntityMapper<CatalogContentBase>, DefaultEntityMapper>();
+            }
+            else
+            {
+                services.AddTransient(typeof(IEntityMapper<TEntity>), config.EntityMapper);
+            }
+
+            var generalOptions = new ProductFeedOptions { MappedEntity = typeof(TEntity) };
+            services.AddSingleton(generalOptions);
 
             foreach (var descriptor in config.Descriptors)
             {

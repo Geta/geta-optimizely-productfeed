@@ -12,20 +12,23 @@ namespace Geta.Optimizely.ProductFeed
 {
     public class ProcessingPipeline<TEntity>
     {
-        private readonly IProductFeedContentLoader<TEntity> _feedContentLoader;
+        private readonly IProductFeedContentLoader _feedContentLoader;
+        private readonly IEntityMapper<TEntity> _entityMapper;
         private readonly IEnumerable<IProductFeedContentEnricher<TEntity>> _enrichers;
         private readonly IEnumerable<FeedDescriptor> _feedDescriptors;
         private readonly Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> _converterFactory;
         private readonly IFeedRepository _feedRepository;
 
         public ProcessingPipeline(
-            IProductFeedContentLoader<TEntity> feedContentLoader,
+            IProductFeedContentLoader feedContentLoader,
+            IEntityMapper<TEntity> entityMapper,
             IEnumerable<IProductFeedContentEnricher<TEntity>> enrichers,
             IEnumerable<FeedDescriptor> feedDescriptors,
             Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> converterFactory,
             IFeedRepository feedRepository)
         {
             _feedContentLoader = feedContentLoader;
+            _entityMapper = entityMapper;
             _enrichers = enrichers;
             _feedDescriptors = feedDescriptors;
             _converterFactory = converterFactory;
@@ -41,6 +44,8 @@ namespace Geta.Optimizely.ProductFeed
 
             var sourceData = _feedContentLoader
                 .LoadSourceData(cancellationToken)
+                .Select(d => _entityMapper.Map(d))
+                .Where(d => d != null)
                 .Select(d =>
                 {
                     foreach (var enricher in _enrichers)

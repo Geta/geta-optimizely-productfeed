@@ -7,8 +7,8 @@ using EPiServer.Commerce.Catalog.ContentTypes;
 
 namespace Geta.Optimizely.ProductFeed
 {
-    public interface IProductFeedContentLoader<out T>
+    public interface IProductFeedContentLoader
     {
-        IEnumerable<T> LoadSourceData(CancellationToken cancellationToken);
+        IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken);
     }
 }

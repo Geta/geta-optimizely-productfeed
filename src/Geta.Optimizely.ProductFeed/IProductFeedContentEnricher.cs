@@ -11,12 +11,10 @@ namespace Geta.Optimizely.ProductFeed
         T Enrich(T sourceData, CancellationToken cancellationToken);
     }
 
-    internal class DefaultIProductFeedContentEnricher : IProductFeedContentEnricher<CatalogContentBase>
+    internal class DefaultIProductFeedContentEnricher<TEntity> : IProductFeedContentEnricher<TEntity>
     {
-        public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
+        public TEntity Enrich(TEntity sourceData, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             return sourceData;
         }
     }

@@ -6,6 +6,8 @@ using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
+using Geta.Optimizely.ProductFeed.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Geta.Optimizely.ProductFeed
 {
@@ -16,12 +18,14 @@ namespace Geta.Optimizely.ProductFeed
     public class FeedBuilderCreateJob : ScheduledJobBase
     {
         private readonly ServiceFactory _serviceFactory;
+        private readonly ProductFeedOptions _options;
         private readonly JobStatusLogger _jobStatusLogger;
         private readonly CancellationTokenSource _cts = new ();
 
-        public FeedBuilderCreateJob(ServiceFactory serviceFactory)
+        public FeedBuilderCreateJob(ServiceFactory serviceFactory, ProductFeedOptions options)
         {
             _serviceFactory = serviceFactory;
+            _options = options;
             _jobStatusLogger = new JobStatusLogger(OnStatusChanged);
 
             IsStoppable = true;
@@ -31,10 +35,15 @@ namespace Geta.Optimizely.ProductFeed
         {
             try
             {
-                var mappedType = typeof(CatalogContentBase);
+                // glory of the generics
+                // this is required as we have no idea until the very last (runtime) what entities consuming project will choose
+                // so to make it easier for the ProductFeed library - whole processing pipeline is generalized with type parameter
+                // but from the point of the scheduled job - we have no info about generic type we should use there
+                // thus - "dynamic" invoke
+                var mappedType = _options.MappedEntity;
                 var genericPipelineType = typeof(ProcessingPipeline<>).MakeGenericType(mappedType);
                 var genericPipeline = _serviceFactory(genericPipelineType);
-                var mi = genericPipelineType.GetMethod("Process");
+                var mi = genericPipelineType.GetMethod(nameof(ProcessingPipeline<object>.Process));
 
                 if (mi != null)
                 {

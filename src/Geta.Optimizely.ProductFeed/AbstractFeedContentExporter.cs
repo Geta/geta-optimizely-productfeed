@@ -23,9 +23,9 @@ namespace Geta.Optimizely.ProductFeed
 
         public virtual void BeginExport(CancellationToken cancellationToken) { }
 
-        public virtual void BuildEntry(TEntity catalogContentBase, CancellationToken cancellationToken)
+        public virtual void BuildEntry(TEntity entity, CancellationToken cancellationToken)
         {
-            var entry = ConvertEntry(catalogContentBase, cancellationToken);
+            var entry = ConvertEntry(entity, cancellationToken);
             if (entry == null)
             {
                 return;
@@ -40,7 +40,7 @@ namespace Geta.Optimizely.ProductFeed
 
         public abstract byte[] SerializeEntry(object value, CancellationToken cancellationToken);
 
-        public abstract object ConvertEntry(TEntity catalogContentBase, CancellationToken cancellationToken);
+        public abstract object ConvertEntry(TEntity entity, CancellationToken cancellationToken);
 
         public virtual ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
         {

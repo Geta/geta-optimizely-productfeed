@@ -27,12 +27,11 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using EPiServer.Commerce.Catalog.ContentTypes;
-using EPiServer.Reference.Commerce.Site.Features.CsvFeed;
-using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Csv;
 using Geta.Optimizely.ProductFeed.Google;
+using EPiServer.Reference.Commerce.Site.Features.ProductFeed;
 
 namespace EPiServer.Reference.Commerce.Site
 {
@@ -123,9 +122,11 @@ namespace EPiServer.Reference.Commerce.Site
             });
 
             services
-                .AddProductFeed<CatalogContentBase>(options =>
+                .AddProductFeed<MyCommerceProductRecord>(options =>
                 {
                     options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    options.SetEntityMapper<EntityMapper>();
+
                     //options.AddEnricher<FashionProductAvailabilityEnricher>();
 
                     options.AddGoogleXmlExport(d =>

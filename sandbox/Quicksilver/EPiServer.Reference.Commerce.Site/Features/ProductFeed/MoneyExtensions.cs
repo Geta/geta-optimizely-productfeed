@@ -1,7 +1,7 @@
 ﻿using System;
 using Mediachase.Commerce;
 
-namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
+namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
 {
     public static class MoneyExtensions
     {

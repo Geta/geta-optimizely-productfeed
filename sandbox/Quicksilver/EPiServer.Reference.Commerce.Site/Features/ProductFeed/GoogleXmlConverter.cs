@@ -13,9 +13,9 @@ using EPiServer.Web;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Google.Models;
 
-namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
+namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
 {
-    public class GoogleXmlConverter : IProductFeedConverter<CatalogContentBase>
+    public class GoogleXmlConverter : IProductFeedConverter<MyCommerceProductRecord>
     {
         private readonly IContentLoader _contentLoader;
         private readonly IPricingService _pricingService;
@@ -31,30 +31,24 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        public object Convert(CatalogContentBase catalogContent)
+        public object Convert(MyCommerceProductRecord catalogContent)
         {
-            var variationContent = catalogContent as FashionVariant;
-            if (variationContent == null)
-            {
-                return null;
-            }
-
-            var product = _contentLoader.Get<CatalogContentBase>(variationContent.GetParentProducts().FirstOrDefault()) as FashionProduct;
-            var variantCode = variationContent.Code;
+            var variantCode = catalogContent.Code;
             var defaultPrice = _pricingService.GetDefaultPrice(variantCode);
 
             var entry = new Entry
             {
                 Id = variantCode,
-                Title = variationContent.DisplayName,
-                Description = product?.Description.ToHtmlString(),
-                Link = variationContent.GetUrl(),
+                Title = catalogContent.DisplayName,
+                Description = catalogContent.Description,
+                Link = catalogContent.Url,
                 Condition = "new",
                 Availability = "in stock",
-                Brand = product?.Brand,
+                Brand = catalogContent.Brand,
                 MPN = string.Empty,
                 GTIN = "725272730706",
                 GoogleProductCategory = string.Empty,
+                ImageLink = catalogContent.ImageLink,
                 Shipping = new List<Shipping>
                 {
                     new()
@@ -65,12 +59,6 @@ namespace EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed
                     }
                 }
             };
-
-            var image = variationContent.GetDefaultAsset<IContentImage>();
-            if (!string.IsNullOrEmpty(image))
-            {
-                entry.ImageLink = Uri.TryCreate(new Uri(_siteUrl), image, out var imageUri) ? imageUri.ToString() : image;
-            }
 
             if (defaultPrice != null)
             {

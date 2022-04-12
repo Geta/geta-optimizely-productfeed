@@ -36,10 +36,10 @@ namespace Geta.Optimizely.ProductFeed.Google
             };
         }
 
-        public override object ConvertEntry(TEntity catalogContentBase, CancellationToken cancellationToken)
+        public override object ConvertEntry(TEntity entity, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var entry = (Entry)Converter.Convert(catalogContentBase);
+            var entry = (Entry)Converter.Convert(entity);
 
             _entries.Add(entry);
 

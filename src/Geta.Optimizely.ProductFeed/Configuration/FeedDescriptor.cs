@@ -26,36 +26,9 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public Type SiteUrlBuilder { get; set; }
 
-        //public void SetExporter<TExporter>() where TExporter : AbstractFeedContentExporter<TEntity>
-        //{
-        //    Exporter = typeof(TExporter);
-        //}
-
-        //public void SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
-        //{
-        //    Converter = typeof(TConverter);
-        //}
-
         public void SetSiteUrlBuilder<TBuilder>() where TBuilder : ISiteUrlBuilder
         {
             SiteUrlBuilder = typeof(TBuilder);
         }
-    }
-
-    public static class FeedDescriptorExtensions
-    {
-        public static FeedDescriptor SetExporter<TExporter, TEntity>(this FeedDescriptor descriptor)
-            where TExporter : AbstractFeedContentExporter<TEntity>
-        {
-            descriptor.Exporter = typeof(TExporter);
-            return descriptor;
-        }
-
-        //public static FeedDescriptor SetConverter<TConverter, TEntity>(this FeedDescriptor descriptor)
-        //    where TConverter : IProductFeedConverter<TEntity>
-        //{
-        //    descriptor.Converter = typeof(TConverter);
-        //    return descriptor;
-        //}
     }
 }
