@@ -5,6 +5,6 @@ namespace Geta.Optimizely.ProductFeed
 {
     public interface IProductFeedConverter<in TEntity>
     {
-        object Convert(TEntity catalogContent);
+        object Convert(TEntity entity);
     }
 }

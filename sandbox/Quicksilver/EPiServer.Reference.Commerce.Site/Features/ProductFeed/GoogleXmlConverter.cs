@@ -31,24 +31,24 @@ namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        public object Convert(MyCommerceProductRecord catalogContent)
+        public object Convert(MyCommerceProductRecord entity)
         {
-            var variantCode = catalogContent.Code;
+            var variantCode = entity.Code;
             var defaultPrice = _pricingService.GetDefaultPrice(variantCode);
 
             var entry = new Entry
             {
                 Id = variantCode,
-                Title = catalogContent.DisplayName,
-                Description = catalogContent.Description,
-                Link = catalogContent.Url,
+                Title = entity.DisplayName,
+                Description = entity.Description,
+                Link = entity.Url,
                 Condition = "new",
                 Availability = "in stock",
-                Brand = catalogContent.Brand,
+                Brand = entity.Brand,
                 MPN = string.Empty,
                 GTIN = "725272730706",
                 GoogleProductCategory = string.Empty,
-                ImageLink = catalogContent.ImageLink,
+                ImageLink = entity.ImageLink,
                 Shipping = new List<Shipping>
                 {
                     new()

@@ -60,7 +60,7 @@ public class SimpleSerializationTests
 
 public class FeedConverter : IProductFeedConverter<CatalogContentBase>
 {
-    public object Convert(CatalogContentBase catalogContent)
+    public object Convert(CatalogContentBase entity)
     {
         return new Entry();
     }
