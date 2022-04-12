@@ -26,7 +26,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Csv;
@@ -139,6 +138,7 @@ namespace EPiServer.Reference.Commerce.Site
                     {
                         d.FileName = "/csv-feed-1";
                         d.SetConverter<CsvConverter>();
+                        d.CsvEntityType = typeof(CsvEntry);
                     });
                 });
         }

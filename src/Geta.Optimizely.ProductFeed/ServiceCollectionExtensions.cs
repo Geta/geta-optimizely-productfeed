@@ -82,7 +82,12 @@ namespace Geta.Optimizely.ProductFeed
 
             foreach (var descriptor in config.Descriptors)
             {
+                // adding descriptor as FeedDescriptor - for the pipeline to find all registered feeds
                 services.AddSingleton(descriptor);
+
+                // adding as actual underlying type - for specific type injections (for example when Csv exporter needs CsvFeedDescriptor)
+                services.AddSingleton(descriptor.GetType(), descriptor);
+
                 services.AddTransient(descriptor.Converter);
                 services.AddTransient(descriptor.Exporter);
                 services.AddTransient(descriptor.SiteUrlBuilder);

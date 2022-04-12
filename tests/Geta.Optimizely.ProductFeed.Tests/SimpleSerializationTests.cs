@@ -19,7 +19,7 @@ public class SimpleSerializationTests
     [Fact]
     public void GenerateSimpleFeed()
     {
-        var gc = new GoogleProductFeedExporter<CatalogContentBase>();
+        var gc = new GoogleFeedExporter<CatalogContentBase>();
         gc.SetConverter(new FeedConverter());
 
         var enrichers = new List<IProductFeedContentEnricher<CatalogContentBase>> { new BrandEnricher2(), new BrandEnricher1() };

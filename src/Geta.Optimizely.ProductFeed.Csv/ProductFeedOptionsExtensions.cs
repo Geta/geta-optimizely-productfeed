@@ -15,10 +15,16 @@ namespace Geta.Optimizely.ProductFeed.Csv
         {
             var descriptor = new CsvFeedDescriptor<TEntity>();
 
-            descriptor.SetExporter<CsvExporter<TEntity>, TEntity>();
+            descriptor.SetExporter<CsvFeedExporter<TEntity>, TEntity>();
             descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
 
             setupAction(descriptor);
+
+            if (descriptor.CsvEntityType == null)
+            {
+                throw new ArgumentException("CsvEntityType is not set");
+            }
+
             options.Add(descriptor);
 
             return options;

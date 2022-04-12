@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Google
 {
-    public class GoogleProductFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
+    public class GoogleFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
     {
         private readonly List<Entry> _entries = new();
 

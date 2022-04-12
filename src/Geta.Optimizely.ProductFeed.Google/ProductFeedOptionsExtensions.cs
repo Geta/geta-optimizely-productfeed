@@ -14,7 +14,7 @@ namespace Geta.Optimizely.ProductFeed.Google
         {
             var descriptor = new GoogleFeedDescriptor<TEntity>();
 
-            descriptor.SetExporter<GoogleProductFeedExporter<TEntity>, TEntity>();
+            descriptor.SetExporter<GoogleFeedExporter<TEntity>, TEntity>();
             descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
 
             setupAction(descriptor);
