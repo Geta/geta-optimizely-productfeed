@@ -55,6 +55,9 @@ namespace Geta.Optimizely.ProductFeed
                     return exporter;
                 });
 
+            var generalOptions = new ProductFeedOptions { MappedEntity = typeof(TEntity) };
+            services.AddSingleton(generalOptions);
+
             var config = new ProductFeedOptions<TEntity>();
             setupAction(config);
 
@@ -72,8 +75,10 @@ namespace Geta.Optimizely.ProductFeed
                 services.AddTransient(typeof(IEntityMapper<TEntity>), config.EntityMapper);
             }
 
-            var generalOptions = new ProductFeedOptions { MappedEntity = typeof(TEntity) };
-            services.AddSingleton(generalOptions);
+            foreach (var enricher in config.Enrichers)
+            {
+                services.AddTransient(typeof(IProductFeedContentEnricher<TEntity>), enricher);
+            }
 
             foreach (var descriptor in config.Descriptors)
             {

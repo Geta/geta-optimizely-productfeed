@@ -127,7 +127,7 @@ namespace EPiServer.Reference.Commerce.Site
                     options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
                     options.SetEntityMapper<EntityMapper>();
 
-                    //options.AddEnricher<FashionProductAvailabilityEnricher>();
+                    options.AddEnricher<FashionProductAvailabilityEnricher>();
 
                     options.AddGoogleXmlExport(d =>
                     {

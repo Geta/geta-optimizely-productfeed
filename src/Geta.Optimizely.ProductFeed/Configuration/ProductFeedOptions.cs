@@ -17,6 +17,8 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public List<FeedDescriptor> Descriptors { get; set; } = new();
 
+        public List<Type> Enrichers { get; set; } = new();
+
         public Type EntityMapper { get; set; }
 
         public void Add(FeedDescriptor feedDescriptor)
@@ -27,6 +29,12 @@ namespace Geta.Optimizely.ProductFeed.Configuration
         public ProductFeedOptions<TEntity> SetEntityMapper<TEntityMapper>() where TEntityMapper : IEntityMapper<TEntity>
         {
             EntityMapper = typeof(TEntityMapper);
+            return this;
+        }
+
+        public ProductFeedOptions<TEntity> AddEnricher<TEnricher>() where TEnricher: IProductFeedContentEnricher<TEntity>
+        {
+            Enrichers.Add(typeof(TEnricher));
             return this;
         }
     }
