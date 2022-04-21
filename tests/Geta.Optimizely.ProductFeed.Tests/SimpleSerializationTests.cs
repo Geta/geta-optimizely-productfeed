@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Reference.Commerce.Site.Features.Product.Models;
+using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Google;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Xunit;
@@ -21,6 +22,8 @@ public class SimpleSerializationTests
     {
         var gc = new GoogleFeedExporter<CatalogContentBase>();
         gc.SetConverter(new FeedConverter());
+        gc.SetSiteUrlBuilder(new SiteUrlBuilderForUnitTests());
+        gc.SetDescriptor(new GoogleFeedDescriptor<CatalogContentBase>());
 
         var enrichers = new List<IProductFeedContentEnricher<CatalogContentBase>> { new BrandEnricher2(), new BrandEnricher1() };
         var converters = new List<AbstractFeedContentExporter<CatalogContentBase>> { gc };
@@ -56,6 +59,11 @@ public class SimpleSerializationTests
             yield return new FashionProduct { Code = i.ToString() };
         }
     }
+}
+
+public class SiteUrlBuilderForUnitTests : ISiteUrlBuilder
+{
+    public string BuildUrl() => string.Empty;
 }
 
 public class FeedConverter : IProductFeedConverter<CatalogContentBase>
