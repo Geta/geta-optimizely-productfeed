@@ -10,271 +10,196 @@
 
 Credits: [How to make a Google Shopping Feed with C# and serve it through the Web API](http://blog.codenamed.nl/2015/05/14/creating-a-google-shopping-feed-with-c/).
 
-This will create a Google Product Feed based on the [Atom specification](https://support.google.com/merchants/answer/160593?hl=en). For information on what is required and what the different attributes/properties mean, please see the [Product data specification](https://support.google.com/merchants/answer/188494).
+Add-on will create a Google Product Feed based on the [Atom specification](https://support.google.com/merchants/answer/160593?hl=en). For information on what is required and what the different attributes/properties mean, please see the [Product data specification](https://support.google.com/merchants/answer/188494).
 
 ## Installation
 
 ```
 > dotnet add package Geta.Optimizely.ProductFeed
 > dotnet add package Geta.Optimizely.ProductFeed.Google
+
+# and/or
+
+> dotnet add package Geta.Optimizely.ProductFeed.Csv
 ```
 
 ## Configuration
 
-For the `ProductFeed` to work, you have to call `AddProductFeed()` and `AddGoogleProductFeed()` extension methods in `Startup.ConfigureServices` method. In an action parameter of this method, you can provide a DB connection string.
+For the `ProductFeed` package to work, you have to call `AddProductFeed<T>()` and `AddGoogleXmlExport()` extension methods in `Startup.ConfigureServices` method. Using configuration options parameter of this method, you can provide a DB connection string and other setup information.
 
 ```csharp
 services
-    .AddProductFeed(x =>
+    .AddProductFeed<MyCommerceProductRecord>(x =>
     {
         x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
-    })
-    .AddGoogleProductFeed(descriptor =>
-    {
-        descriptor.SetMapper<FeedEntityMapper>();
+        x.SetEntityMapper<EntityMapper>();
     });
 ```
 
-## Feed Entity Mapping
+Here `MyCommerceProductRecord` is an entity to which a generic CatalogContentBase objects will be mapped to.
 
-`FeedEntityMapper` is mapping implementation to provide data for your Google entity mapping.
+## Processing Pipeline
+
+During the processing pipeline there are a few key moments to be aware of (you can override any of these mentioned below):
+
+* Catalog Data **Load** - loads data from the Optimizely Commerce catalog.
+* Catalog Data **Map** - loaded data usually comes in `CatalogContentBase` shape. This step allows mapping to `T` data type (mentioned in `AddProductFeed<T>()` method).
+* **Enrichments** - When loaded data is mapped to a custom entity, the processing pipeline can start the work. Enrichments are responsible for loading some heavy data and adding necessary metadata to the `T` entity.
+* Feed **Exporters** - exporters are responsible for generating feed content in a specific format and using specific feed entities.
+* Feed entity **Converter** - converters are responsible for taking the projected entity (`T` mentioned in `AddProductFeed()`) and return a feed entity which will be used to store the actual product feed in the underlying storage.
+* **Storage** Providers - right now we only have MSSQL storage implementation. But should be quite easy to implement the next one.
+
+![](docs/images/productfeed-1.png)
+
+### Adding Google Xml Export
+
+Following code adds Google Xml product feed functionality to your site:
+
+```
+services
+    .AddProductFeed<MyCommerceProductRecord>(options =>
+    {
+        options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+        options.SetEntityMapper<EntityMapper>();
+
+        options.AddEnricher<FashionProductAvailabilityEnricher>();
+
+        options.AddGoogleXmlExport(d =>
+        {
+            d.FileName = "/google-feed";
+            d.SetConverter<GoogleXmlConverter>();
+        });
+    });
+```
+
+Few notes:
+
+* Loaded commerce catalog data will be mapped to `MyCommerceProductRecord` class.
+* `EntityMapper` will be used to do this mapping.
+* `FashionProductAvailabilityEnricher` will be used to process each `MyCommerceProductRecord` and set SKU availability by some criteria.
+* Google Xml product feed entities will be generated using `GoogleXmlConverter` class.
+* Feed data will be stored in MSSQL database under `"EPiServerDB"` connection string.
+* Google Xml product feed will be mounted to `/google-feed` URL.
+
+Custom mapped entity class (`MyCommerceProductRecord.cs`):
 
 ```csharp
-public class FeedEntityMapper : IProductFeedEntityMapper
+public class MyCommerceProductRecord
 {
-    public Feed GenerateFeedEntity(FeedDescriptor feedDescriptor)
-    {
-        // logic to generate feed entity (root) goes here
-    }
+    public string Code { get; set; }
+    public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public string Url { get; set; }
+    public string Brand { get; set; }
+    public string ImageLink { get; set; }
+    public bool IsAvailable { get; set; }
+}
+```
 
-    public Entry GenerateEntry(CatalogContentBase catalogContent)
+Custom entity mapper (`EntityMapper.cs`):
+
+```csharp
+public class EntityMapper : IEntityMapper<MyCommerceProductRecord>
+{
+    public MyCommerceProductRecord Map(CatalogContentBase catalogConte
     {
-        // logic to generate each entry in the feed goes here
+        return ...
     }
 }
 ```
 
-Alternatively, you can configure a connection string in the `appsettings.config` file. A configuration from the `appsettings.json` will override configuration configured in Startup. Below is an `appsettings.json` configuration example.
+Enricher (`FashionProductAvailabilityEnricher.cs`):
 
-```json
-"Geta": {
-    "ProductFeed": {
-        "ConnectionString": "Data Source=..."
+```csharp
+public class FashionProductAvailabilityEnricher :
+    IProductFeedContentEnricher<MyCommerceProductRecord>
+{
+    public MyCommerceProductRecord Enrich(
+        MyCommerceProductRecord sourceData,
+        CancellationToken cancellationToken)
+    {
+        // enrich SKU availability
     }
 }
 ```
 
-Default URL for the google product feed is mounted on: `/googleproductfeed`. But you can configure to whatever suits your project best:
+Google Xml feed entity converter (`GoogleXmlConverter.cs`):
+
+```csharp
+public class GoogleXmlConverter : IProductFeedConverter<MyCommerceProductRecord>
+{
+    public object Convert(MyCommerceProductRecord entity)
+    {
+        return new Geta.Optimizely.ProductFeed.Google.Models.Entry
+        {
+            // set properties for feed entity
+        }
+    }
+}
+```
+
+### Adding CSV Export
+
+Adding CSV export is quite easy as well.
+
+Then add somewhat similar code to your `Startup.cs` file:
 
 ```csharp
 services
-    .AddProductFeed()
-    .AddGoogleProductFeed(descriptor =>
+    .AddProductFeed<MyCommerceProductRecord>(options =>
     {
-        descriptor.FileName = "/my-own-folder/my-feed";
-        descriptor.SetMapper<FeedEntityMapper>();
+        options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+        options.SetEntityMapper<EntityMapper>();
+
+        options.AddEnricher<FashionProductAvailabilityEnricher>();
+
+        options.AddCsvExport(d =>
+        {
+            d.FileName = "/csv-feed-1";
+            d.SetConverter<CsvConverter>();
+            d.CsvEntityType = typeof(CsvEntry);
+        });
     });
 ```
 
-## FeedBuilder
+All processing pipeline logic is the same as for the Google Xml feed except following changes:
 
-You need to implement the abstract class `FeedBuilder` and the method `Build`. This will provide the feed data. `Build` method returns a list of feeds, this is required so that `FeedBuilder` can produce feeds for both multi-site and single-site projects. Example bellow can be extended to support multi-site projects.
+* CSV product feed entity is set to `CsvEntity`.
+* Feed entity is converted via `CsvConverter`.
+* Feed is mounted to `/csv-feed-1` route.
 
-### Default FeedBuilder
+Custom CSV entity (`CsvEntity.cs`):
 
-You can inherit from default base feed builder class (`DefaultFeedBuilderBase`) which will help you get started.
-It contains `CatalogEntry` enumeration code and sample error handling. You will need to implement following methods:
-
-```csharp
-protected abstract Feed GenerateFeedEntity();
-
-protected abstract Entry GenerateEntry(CatalogContentBase catalogContent);
+```csahrp
+public class CsvEntry
+{
+    public string Name { get; set; }
+    public string Code { get; set; }
+    public decimal Price { get; set; }
+    public bool IsAvailable { get; set; }
+}
 ```
 
-For example:
+CSV converter (`CsvConverter.cs`):
 
 ```csharp
-public class MyFeedBuilder : DefaultFeedBuilderBase
+public class CsvConverter : IProductFeedConverter<MyCommerceProductRecord>
 {
-    private readonly IPricingService _pricingService;
-    private readonly Uri _siteUri;
-
-    public MyFeedBuilder(
-        IContentLoader contentLoader,
-        ReferenceConverter referenceConverter,
-        IPricingService pricingService,
-        ISiteDefinitionRepository siteDefinitionRepository,
-        IContentLanguageAccessor languageAccessor) : base(contentLoader, referenceConverter, languageAccessor)
+    public object Convert(MyCommerceProductRecord entity)
     {
-        _pricingService = pricingService;
-        _siteUri = siteDefinitionRepository.List().FirstOrDefault()?.Hosts.GetPrimaryHostDefinition().Url;
-    }
-
-    protected override Feed GenerateFeedEntity()
-    {
-        return new Feed
+        return new CsvEntry
         {
-            Updated = DateTime.UtcNow,
-            Title = "My products",
-            Link = _siteUri.ToString()
+            // set properties for the entity
         };
-    }
-
-    protected override Entry GenerateEntry(CatalogContentBase catalogContent)
-    {
-        return ...;
-    }
-
-    private HostDefinition GetPrimaryHostDefinition(IList<HostDefinition> hosts)
-    {
-        if (hosts == null)
-        {
-            throw new ArgumentNullException(nameof(hosts));
-        }
-
-        return hosts.FirstOrDefault(h => h.Type == HostDefinitionType.Primary && !h.IsWildcardHost())
-               ?? hosts.FirstOrDefault(h => !h.IsWildcardHost());
     }
 }
 ```
 
-### Implement Your Own Builder
-
-If you need more flexible solution to build Google Product Feed - you can implement whole builder yourself.
-Below is given sample feed builder (based on Quicksilver demo project). Please use it as a starting point and adjust things that you need to customize.
-Also, keep in mind that for example error handling is not implemented in this sample (which means if variation generation fails - job will be aborted and feed will not be generated at all).
-
-```csharp
-public class MyFeedBuilder : FeedBuilder
-{
-    private readonly IContentLoader _contentLoader;
-    private readonly ReferenceConverter _referenceConverter;
-    private readonly IPricingService _pricingService;
-    private readonly ILogger _logger;
-    private readonly IContentLanguageAccessor _languageAccessor;
-    private readonly Uri _siteUri;
-
-    public MyFeedBuilder(
-        IContentLoader contentLoader,
-        ReferenceConverter referenceConverter,
-        IPricingService pricingService,
-        ISiteDefinitionRepository siteDefinitionRepository,
-        IContentLanguageAccessor languageAccessor)
-    {
-        _contentLoader = contentLoader;
-        _referenceConverter = referenceConverter;
-        _pricingService = pricingService;
-        _logger = LogManager.GetLogger(typeof(MyFeedBuilder));
-        _languageAccessor = languageAccessor;
-        _siteUri = GetPrimaryHostDefinition(siteDefinitionRepository.List().FirstOrDefault()?.Hosts)?.Url;
-    }
-
-    public override List<Feed> Build()
-    {
-        List<Feed> generatedFeeds = new List<Feed>();
-        Feed feed = new Feed
-        {
-            Updated = DateTime.UtcNow,
-            Title = "My products",
-            Link = _siteUri.ToString()
-        };
-
-        IEnumerable<ContentReference> catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
-        IEnumerable<CatalogContentBase> items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
-
-        List<Entry> entries = new List<Entry>();
-        foreach (CatalogContentBase catalogContent in items)
-        {
-            FashionVariant variationContent = catalogContent as FashionVariant;
-
-            try
-            {
-                if (variationContent == null)
-                    continue;
-
-                FashionProduct product = _contentLoader.Get<CatalogContentBase>(variationContent.GetParentProducts().FirstOrDefault()) as FashionProduct;
-                string variantCode = variationContent.Code;
-                IPriceValue defaultPrice = _pricingService.GetPrice(variantCode);
-
-                Entry entry = new Entry
-                {
-                    Id = variationContent.Code,
-                    Title = variationContent.DisplayName,
-                    Description = product?.Description.ToHtmlString(),
-                    Link = variationContent.GetUrl(),
-                    Condition = "new",
-                    Availability = "in stock",
-                    Brand = product?.Brand,
-                    MPN = "",
-                    GTIN = "...",
-                    GoogleProductCategory = "",
-                    Shipping = new List<Shipping>
-                    {
-                        new Shipping
-                        {
-                            Price = "Free",
-                            Country = "US",
-                            Service = "Standard"
-                        }
-                    }
-                };
-
-                string image = variationContent.GetDefaultAsset<IContentImage>();
-
-                if (!string.IsNullOrEmpty(image))
-                {
-                    entry.ImageLink = Uri.TryCreate(_siteUri, image, out Uri imageUri) ? imageUri.ToString() : image;
-                }
-
-                if (defaultPrice != null)
-                {
-                    IPriceValue discountPrice = _pricingService.GetDiscountPrice(variantCode);
-
-                    entry.Price = defaultPrice.UnitPrice.ToString();
-                    entry.SalePrice = discountPrice.ToString();
-                    entry.SalePriceEffectiveDate = $"{DateTime.UtcNow:yyyy-MM-ddThh:mm:ss}/{DateTime.UtcNow.AddDays(7):yyyy-MM-ddThh:mm:ss}";
-                }
-
-                entries.Add(entry);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Failed to generate feed item for catalog entry ({catalogContent.ContentGuid})", ex);
-            }
-        }
-
-        feed.Entries = entries;
-        generatedFeeds.Add(feed);
-
-        return generatedFeeds;
-    }
-
-    private HostDefinition GetPrimaryHostDefinition(IList<HostDefinition> hosts)
-    {
-        if (hosts == null)
-        {
-            throw new ArgumentNullException(nameof(hosts));
-        }
-
-        return hosts.FirstOrDefault(h => h.Type == HostDefinitionType.Primary && !h.IsWildcardHost())
-                ?? hosts.FirstOrDefault(h => !h.IsWildcardHost());
-    }
-
-    private LoaderOptions CreateDefaultLoadOption()
-    {
-        LoaderOptions loaderOptions = new LoaderOptions
-        {
-            LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language)
-        };
-
-        return loaderOptions;
-    }
-}
-```
+CSV feed will have a header row generated out-of-the-box based on properties in `CsvEntity` class.
 
 ## Feed Generation
 
-Populating the feed is handled through a scheduled job and the result is serialized and stored in the database. See job `Google ProductFeed - Create feed` in the Admin mode.
+Populating the feed is handled through a scheduled job and the result is serialized and stored in the database. See job `ProductFeed - Create feeds` in the Optimizely Admin mode.
 
 ## Troubleshooting
 
