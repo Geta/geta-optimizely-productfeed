@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 
-namespace Geta.Optimizely.GoogleProductFeed.EfDesign
+namespace Geta.Optimizely.ProductFeed.EfDesign
 {
-    class Program
+    static class Program
     {
         static void Main(string[] args)
         {

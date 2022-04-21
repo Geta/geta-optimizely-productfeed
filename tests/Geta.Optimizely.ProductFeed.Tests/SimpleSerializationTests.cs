@@ -49,7 +49,7 @@ public class SimpleSerializationTests
         Assert.NotNull(result);
     }
 
-    private IEnumerable<FashionProduct> LoadSourceData()
+    private static IEnumerable<FashionProduct> LoadSourceData()
     {
         for (var i = 0; i < 10; i++)
         {
