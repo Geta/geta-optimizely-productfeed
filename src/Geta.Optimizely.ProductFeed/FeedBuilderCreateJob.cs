@@ -3,11 +3,9 @@
 
 using System;
 using System.Threading;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 using Geta.Optimizely.ProductFeed.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace Geta.Optimizely.ProductFeed
 {
@@ -36,9 +34,9 @@ namespace Geta.Optimizely.ProductFeed
             try
             {
                 // glory of the generics
-                // this is required as we have no idea until the very last (runtime) what entities consuming project will choose
+                // this is required as we have no idea until the very last minute (runtime) what entity type consuming project will choose
                 // so to make it easier for the ProductFeed library - whole processing pipeline is generalized with type parameter
-                // but from the point of the scheduled job - we have no info about generic type we should use there
+                // but from the point of view of the scheduled job - we have no info about generic type we should use here
                 // thus - "dynamic" invoke
                 var mappedType = _options.MappedEntity;
                 var genericPipelineType = typeof(ProcessingPipeline<>).MakeGenericType(mappedType);

@@ -14,7 +14,9 @@ namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
         private readonly IContentLoader _contentLoader;
         private readonly string _siteUrl;
 
-        public EntityMapper(IContentLoader contentLoader, ISiteDefinitionRepository siteDefinitionRepository)
+        public EntityMapper(
+            IContentLoader contentLoader,
+            ISiteDefinitionRepository siteDefinitionRepository)
         {
             _contentLoader = contentLoader;
             _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
