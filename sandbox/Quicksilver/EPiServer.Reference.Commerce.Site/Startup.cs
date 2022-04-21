@@ -26,9 +26,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
-using Geta.Optimizely.GoogleProductFeed;
-using Geta.Optimizely.GoogleProductFeed.Configuration;
-using EPiServer.Reference.Commerce.Site.Features.GoogleProductFeed;
+using Geta.Optimizely.ProductFeed;
+using Geta.Optimizely.ProductFeed.Configuration;
+using Geta.Optimizely.ProductFeed.Csv;
+using Geta.Optimizely.ProductFeed.Google;
+using EPiServer.Reference.Commerce.Site.Features.ProductFeed;
 
 namespace EPiServer.Reference.Commerce.Site
 {
@@ -104,6 +106,10 @@ namespace EPiServer.Reference.Commerce.Site
                 o.ModelBinderProviders.Insert(0, new ModelBinderProvider());
             });
 
+            services
+                .AddControllers()
+                .AddXmlSerializerFormatters();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/util/Login";
@@ -114,12 +120,27 @@ namespace EPiServer.Reference.Commerce.Site
                 o.DisableOrderDataLocalization = true;
             });
 
-            services.AddGoogleProductFeed(x =>
-            {
-                x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
-            });
+            services
+                .AddProductFeed<MyCommerceProductRecord>(options =>
+                {
+                    options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    options.SetEntityMapper<EntityMapper>();
 
-            services.AddTransient<FeedBuilder, EpiBaseImplementation>();
+                    options.AddEnricher<FashionProductAvailabilityEnricher>();
+
+                    options.AddGoogleXmlExport(d =>
+                    {
+                        d.FileName = "/google-feed";
+                        d.SetConverter<GoogleXmlConverter>();
+                    });
+
+                    options.AddCsvExport(d =>
+                    {
+                        d.FileName = "/csv-feed-1";
+                        d.SetConverter<CsvConverter>();
+                        d.CsvEntityType = typeof(CsvEntry);
+                    });
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -139,6 +160,7 @@ namespace EPiServer.Reference.Commerce.Site
                 endpoints.MapControllerRoute(name: "Default", pattern: "{controller}/{action}/{id?}");
                 endpoints.MapControllers();
                 endpoints.MapContent();
+                endpoints.MapProductFeeds();
             });
         }
     }

@@ -1,6 +1,9 @@
 # Geta Optimizely Product Feed
 
-![](http://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_OptimizelyGoogleProductFeed_00ci),branch:master/statusIcon)
+## Status
+
+![](https://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_OptimizelyGoogleProductFeed_00ci),branch:master/statusIcon)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=Geta_geta-optimizely-productfeed)](https://sonarcloud.io/summary/new_code?id=Geta_geta-optimizely-productfeed)
 [![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
 [![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
 [![Platform](https://img.shields.io/badge/Optimizely%20Commerce-14-orange.svg?style=flat)](http://world.episerver.com/commerce/)
@@ -12,31 +15,66 @@ This will create a Google Product Feed based on the [Atom specification](https:/
 ## Installation
 
 ```
-Install-Package Geta.Optimizely.GoogleProductFeed
+> dotnet add package Geta.Optimizely.ProductFeed
+> dotnet add package Geta.Optimizely.ProductFeed.Google
 ```
 
 ## Configuration
 
-For the `GoogleProductFeed` to work, you have to call `AddGoogleProductFeed` extension method in `Startup.ConfigureServices` method. In an action parameter of this method, you can provide a DB connection string.
+For the `ProductFeed` to work, you have to call `AddProductFeed()` and `AddGoogleProductFeed()` extension methods in `Startup.ConfigureServices` method. In an action parameter of this method, you can provide a DB connection string.
 
-```charp
-services.AddGoogleProductFeed(x =>
+```csharp
+services
+    .AddProductFeed(x =>
     {
         x.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+    })
+    .AddGoogleProductFeed(descriptor =>
+    {
+        descriptor.SetMapper<FeedEntityMapper>();
     });
+```
+
+## Feed Entity Mapping
+
+`FeedEntityMapper` is mapping implementation to provide data for your Google entity mapping.
+
+```csharp
+public class FeedEntityMapper : IProductFeedEntityMapper
+{
+    public Feed GenerateFeedEntity(FeedDescriptor feedDescriptor)
+    {
+        // logic to generate feed entity (root) goes here
+    }
+
+    public Entry GenerateEntry(CatalogContentBase catalogContent)
+    {
+        // logic to generate each entry in the feed goes here
+    }
+}
 ```
 
 Alternatively, you can configure a connection string in the `appsettings.config` file. A configuration from the `appsettings.json` will override configuration configured in Startup. Below is an `appsettings.json` configuration example.
 
 ```json
 "Geta": {
-    "GoogleProductFeed": {
+    "ProductFeed": {
         "ConnectionString": "Data Source=..."
     }
 }
 ```
 
-Default URL for the google product feed is: /googleproductfeed
+Default URL for the google product feed is mounted on: `/googleproductfeed`. But you can configure to whatever suits your project best:
+
+```csharp
+services
+    .AddProductFeed()
+    .AddGoogleProductFeed(descriptor =>
+    {
+        descriptor.FileName = "/my-own-folder/my-feed";
+        descriptor.SetMapper<FeedEntityMapper>();
+    });
+```
 
 ## FeedBuilder
 
@@ -234,22 +272,13 @@ public class MyFeedBuilder : FeedBuilder
 }
 ```
 
-
-### Register Builder in IoC
-
-Then you need to use this as the default implementation for `FeedBuilder`.
-
-```csharp
-services.AddTransient<FeedBuilder, MyFeedBuilder>();
-```
-
 ## Feed Generation
 
 Populating the feed is handled through a scheduled job and the result is serialized and stored in the database. See job `Google ProductFeed - Create feed` in the Admin mode.
 
 ## Troubleshooting
 
-If your request to `/googleproductfeed` returns 404 with message `No feed generated`, make sure you run the job to populate the feed.
+If your request to `/googleproductfeed` (or any other path that you configured for the feed) returns 404 with message `No feed generated`, make sure you run the job to populate the feed.
 
 ## Local development setup
 
