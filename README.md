@@ -44,8 +44,10 @@ During the processing pipeline there are a few key moments to be aware of (you c
 
 * Catalog Data **Load** - loads data from the Optimizely Commerce catalog.
 * Catalog Data **Map** - loaded data usually comes in `CatalogContentBase` shape. This step allows mapping to `T` data type (mentioned in `AddProductFeed<T>()` method).
+* Entity **Filters** - filters are deciding whether entity should be included in the processing pipeline or filtered out.
 * **Enrichments** - When loaded data is mapped to a custom entity, the processing pipeline can start the work. Enrichments are responsible for loading some heavy data and adding necessary metadata to the `T` entity.
 * Feed **Exporters** - exporters are responsible for generating feed content in a specific format and using specific feed entities.
+* Feed **Filters** - filters are responsible for deciding whether specific entity should be included in the feed.
 * Feed entity **Converter** - converters are responsible for taking the projected entity (`T` mentioned in `AddProductFeed()`) and return a feed entity which will be used to store the actual product feed in the underlying storage.
 * **Storage** Providers - right now we only have MSSQL storage implementation. But should be quite easy to implement the next one.
 
@@ -62,11 +64,13 @@ services
         options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
         options.SetEntityMapper<EntityMapper>();
 
+        options.SetFilter<GenericEntityFilter>();
         options.AddEnricher<FashionProductAvailabilityEnricher>();
 
         options.AddGoogleXmlExport(d =>
         {
             d.FileName = "/google-feed";
+            d.SetFilter<GoogleXmlFilter>();
             d.SetConverter<GoogleXmlConverter>();
         });
     });
@@ -77,6 +81,7 @@ Few notes:
 * Loaded commerce catalog data will be mapped to `MyCommerceProductRecord` class.
 * `EntityMapper` will be used to do this mapping.
 * `FashionProductAvailabilityEnricher` will be used to process each `MyCommerceProductRecord` and set SKU availability by some criteria.
+* `GoogleXmlFilter` filter will be used for each entity to decide whether particular entity should be included in the feed.
 * Google Xml product feed entities will be generated using `GoogleXmlConverter` class.
 * Feed data will be stored in MSSQL database under `"EPiServerDB"` connection string.
 * Google Xml product feed will be mounted to `/google-feed` URL.
@@ -108,6 +113,19 @@ public class EntityMapper : IEntityMapper<MyCommerceProductRecord>
 }
 ```
 
+Generic converted entity filter (`GenericEntityFilter.cs`):
+
+```csharp
+public class GenericEntityFilter : IProductFeedFilter<MyCommerceProductRecord>
+{
+    public bool ShouldInclude(MyCommerceProductRecord entity)
+    {
+        // filter out ALL entities from the feed
+        return false;
+    }
+}
+```
+
 Enricher (`FashionProductAvailabilityEnricher.cs`):
 
 ```csharp
@@ -119,6 +137,18 @@ public class FashionProductAvailabilityEnricher :
         CancellationToken cancellationToken)
     {
         // enrich SKU availability
+    }
+}
+```
+
+Google Xml feed filter (`GoogleXmlFilter.cs`):
+
+```csharp
+public class GoogleXmlFilter : IProductFeedFilter<MyCommerceProductRecord>
+{
+    public bool ShouldInclude(MyCommerceProductRecord entity)
+    {
+        return true;
     }
 }
 ```

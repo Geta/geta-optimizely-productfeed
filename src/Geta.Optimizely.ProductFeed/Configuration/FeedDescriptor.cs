@@ -24,6 +24,8 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public Type Converter { get; set; }
 
+        public Type Filter { get; set; }
+
         public Type SiteUrlBuilder { get; set; }
 
         public void SetSiteUrlBuilder<TBuilder>() where TBuilder : ISiteUrlBuilder

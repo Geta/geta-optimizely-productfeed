@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Geta.Optimizely.ProductFeed.Configuration
 {
@@ -18,6 +19,8 @@ namespace Geta.Optimizely.ProductFeed.Configuration
         public List<FeedDescriptor> Descriptors { get; set; } = new();
 
         public List<Type> Enrichers { get; set; } = new();
+
+        public Type Filter { get; set; }
 
         public Type EntityMapper { get; set; }
 
@@ -35,6 +38,12 @@ namespace Geta.Optimizely.ProductFeed.Configuration
         public ProductFeedOptions<TEntity> AddEnricher<TEnricher>() where TEnricher: IProductFeedContentEnricher<TEntity>
         {
             Enrichers.Add(typeof(TEnricher));
+            return this;
+        }
+
+        public ProductFeedOptions<TEntity> SetFilter<TFilter>() where TFilter: IProductFeedFilter<TEntity>
+        {
+            Filter = typeof(TFilter);
             return this;
         }
     }

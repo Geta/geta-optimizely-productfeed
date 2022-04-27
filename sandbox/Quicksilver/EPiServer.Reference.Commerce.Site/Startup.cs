@@ -126,11 +126,13 @@ namespace EPiServer.Reference.Commerce.Site
                     options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
                     options.SetEntityMapper<EntityMapper>();
 
+                    options.SetFilter<GenericEntityFilter>();
                     options.AddEnricher<FashionProductAvailabilityEnricher>();
 
                     options.AddGoogleXmlExport(d =>
                     {
                         d.FileName = "/google-feed";
+                        //d.SetFilter<GoogleXmlFilter>();
                         d.SetConverter<GoogleXmlConverter>();
                     });
 

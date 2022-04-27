@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using System.Collections.Generic;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.GoogleProductFeed.Repositories;
 using Geta.Optimizely.ProductFeed.Configuration;
@@ -42,14 +41,23 @@ namespace Geta.Optimizely.ProductFeed
                 provider => d =>
                 {
                     var exporter = provider.GetRequiredService(d.Exporter) as AbstractFeedContentExporter<TEntity>;
-                    var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter<TEntity>;
-                    var siteUrlBuilder = provider.GetRequiredService(d.SiteUrlBuilder) as ISiteUrlBuilder;
 
-                    if (exporter != null && converter != null && siteUrlBuilder != null)
+                    if (exporter != null)
                     {
-                        exporter.SetDescriptor(d);
-                        exporter.SetConverter(converter);
-                        exporter.SetSiteUrlBuilder(siteUrlBuilder);
+                        if (d.Filter != null && provider.GetService(d.Filter) is IProductFeedFilter<TEntity> filter)
+                        {
+                            exporter.SetFilter(filter);
+                        }
+
+                        var converter = provider.GetRequiredService(d.Converter) as IProductFeedConverter<TEntity>;
+                        var siteUrlBuilder = provider.GetRequiredService(d.SiteUrlBuilder) as ISiteUrlBuilder;
+
+                        if (converter != null && siteUrlBuilder != null)
+                        {
+                            exporter.SetDescriptor(d);
+                            exporter.SetConverter(converter);
+                            exporter.SetSiteUrlBuilder(siteUrlBuilder);
+                        }
                     }
 
                     return exporter;
@@ -75,6 +83,11 @@ namespace Geta.Optimizely.ProductFeed
                 services.AddTransient(typeof(IEntityMapper<TEntity>), config.EntityMapper);
             }
 
+            if (config.Filter != null)
+            {
+                services.AddTransient(typeof(IProductFeedFilter<TEntity>), config.Filter);
+            }
+
             foreach (var enricher in config.Enrichers)
             {
                 services.AddTransient(typeof(IProductFeedContentEnricher<TEntity>), enricher);
@@ -87,6 +100,11 @@ namespace Geta.Optimizely.ProductFeed
 
                 // adding as actual underlying type - for specific type injections (for example when Csv exporter needs CsvFeedDescriptor)
                 services.AddSingleton(descriptor.GetType(), descriptor);
+
+                if (descriptor.Filter != null)
+                {
+                    services.AddTransient(descriptor.Filter);
+                }
 
                 services.AddTransient(descriptor.Converter);
                 services.AddTransient(descriptor.Exporter);

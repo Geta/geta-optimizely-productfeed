@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
+    <PackageVersion>2.1.0</PackageVersion>
     <PackageId>Geta.Optimizely.ProductFeed</PackageId>
     <Title>Geta Optimizely Product Feed ProductFeed</Title>
-    <PackageVersion>2.0.0</PackageVersion>
     <IsPackable>true</IsPackable>
     <Authors>Geta Digital</Authors>
     <Company>Geta Digital</Company>

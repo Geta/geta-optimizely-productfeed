@@ -17,5 +17,11 @@ namespace Geta.Optimizely.ProductFeed.Csv
             Converter = typeof(TConverter);
             return this;
         }
+
+        public CsvFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
+        {
+            Filter = typeof(TFilter);
+            return this;
+        }
     }
 }

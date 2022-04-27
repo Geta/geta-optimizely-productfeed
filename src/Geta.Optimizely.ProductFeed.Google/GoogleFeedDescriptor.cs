@@ -14,5 +14,11 @@ namespace Geta.Optimizely.ProductFeed.Google
             Converter = typeof(TConverter);
             return this;
         }
+
+        public GoogleFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
+        {
+            Filter = typeof(TFilter);
+            return this;
+        }
     }
 }

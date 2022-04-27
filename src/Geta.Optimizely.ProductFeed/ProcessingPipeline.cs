@@ -18,6 +18,7 @@ namespace Geta.Optimizely.ProductFeed
         private readonly IEnumerable<FeedDescriptor> _feedDescriptors;
         private readonly Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> _converterFactory;
         private readonly IFeedRepository _feedRepository;
+        private readonly IProductFeedFilter<TEntity> _filter;
 
         public ProcessingPipeline(
             IProductFeedContentLoader feedContentLoader,
@@ -25,7 +26,8 @@ namespace Geta.Optimizely.ProductFeed
             IEnumerable<IProductFeedContentEnricher<TEntity>> enrichers,
             IEnumerable<FeedDescriptor> feedDescriptors,
             Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> converterFactory,
-            IFeedRepository feedRepository)
+            IFeedRepository feedRepository,
+            IProductFeedFilter<TEntity> filter = null)
         {
             _feedContentLoader = feedContentLoader;
             _entityMapper = entityMapper;
@@ -33,6 +35,7 @@ namespace Geta.Optimizely.ProductFeed
             _feedDescriptors = feedDescriptors;
             _converterFactory = converterFactory;
             _feedRepository = feedRepository;
+            _filter = filter;
         }
 
         public void Process(JobStatusLogger logger, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ namespace Geta.Optimizely.ProductFeed
             var sourceData = _feedContentLoader
                 .LoadSourceData(cancellationToken)
                 .Select(d => _entityMapper.Map(d))
+                .Where(d => _filter?.ShouldInclude(d) ?? true)
                 .Where(d => d != null)
                 .Select(d =>
                 {

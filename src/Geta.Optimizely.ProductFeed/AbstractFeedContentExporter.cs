@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
@@ -17,6 +16,8 @@ namespace Geta.Optimizely.ProductFeed
 
         public IProductFeedConverter<TEntity> Converter { get; private set; }
 
+        public IProductFeedFilter<TEntity> Filter { get; private set; }
+
         public ISiteUrlBuilder SiteUrlBuilder { get; private set; }
 
         public FeedDescriptor Descriptor { get; private set; }
@@ -25,6 +26,13 @@ namespace Geta.Optimizely.ProductFeed
 
         public virtual void BuildEntry(TEntity entity, CancellationToken cancellationToken)
         {
+            var shouldInclude = Filter?.ShouldInclude(entity) ?? true;
+
+            if (!shouldInclude)
+            {
+                return;
+            }
+
             var entry = ConvertEntry(entity, cancellationToken);
             if (entry == null)
             {
@@ -58,6 +66,11 @@ namespace Geta.Optimizely.ProductFeed
         public void SetConverter(IProductFeedConverter<TEntity> converter)
         {
             Converter = converter;
+        }
+
+        public void SetFilter(IProductFeedFilter<TEntity> filter)
+        {
+            Filter = filter;
         }
 
         public void SetSiteUrlBuilder(ISiteUrlBuilder urlBuilder)
