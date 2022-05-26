@@ -124,10 +124,13 @@ namespace EPiServer.Reference.Commerce.Site
                 .AddProductFeed<MyCommerceProductRecord>(options =>
                 {
                     options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+
                     options.SetEntityMapper<EntityMapper>();
 
-                    options.SetFilter<GenericEntityFilter>();
+                    //options.SetFilter<GenericEntityFilter>();
                     options.AddEnricher<FashionProductAvailabilityEnricher>();
+
+                    //options.SetSiteBuilder<MySiteBuilder>();
 
                     options.AddGoogleXmlExport(d =>
                     {

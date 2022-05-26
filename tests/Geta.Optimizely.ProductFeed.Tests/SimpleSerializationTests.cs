@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Reference.Commerce.Site.Features.Product.Models;
-using Geta.Optimizely.ProductFeed.Configuration;
+using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Google;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Xunit;
@@ -43,11 +43,11 @@ public class SimpleSerializationTests
         {
             foreach (var converter in converters)
             {
-                converter.ConvertEntry(d, _cts.Token);
+                converter.ConvertEntry(d, null, _cts.Token);
             }
         }
 
-        var result = gc.FinishExport(_cts.Token);
+        var result = gc.FinishExport(null, _cts.Token);
 
         Assert.NotNull(result);
     }
@@ -68,7 +68,7 @@ public class SiteUrlBuilderForUnitTests : ISiteUrlBuilder
 
 public class FeedConverter : IProductFeedConverter<CatalogContentBase>
 {
-    public object Convert(CatalogContentBase entity)
+    public object Convert(CatalogContentBase entity, HostDefinition host)
     {
         return new Entry();
     }

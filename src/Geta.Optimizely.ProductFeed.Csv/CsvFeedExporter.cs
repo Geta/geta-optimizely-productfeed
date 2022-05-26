@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using CsvHelper;
 using CsvHelper.Configuration;
+using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Csv
@@ -23,15 +24,15 @@ namespace Geta.Optimizely.ProductFeed.Csv
             _writer = new CsvWriter(new StreamWriter(Buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
         }
 
-        public override void BeginExport(CancellationToken cancellationToken)
+        public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
         {
             _writer.WriteHeader(_descriptor.CsvEntityType);
             _writer.NextRecord();
         }
 
-        public override object ConvertEntry(TEntity entity, CancellationToken cancellationToken)
+        public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
         {
-            return Converter.Convert(entity);
+            return Converter.Convert(entity, host);
         }
 
         public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
@@ -42,11 +43,11 @@ namespace Geta.Optimizely.ProductFeed.Csv
             return Array.Empty<byte>();
         }
 
-        public override ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
+        public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
         {
             _writer.Flush();
 
-            return base.FinishExport(cancellationToken);
+            return base.FinishExport(host, cancellationToken);
         }
     }
 }

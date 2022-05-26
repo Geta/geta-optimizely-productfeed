@@ -69,6 +69,9 @@ namespace Geta.Optimizely.ProductFeed
             var config = new ProductFeedOptions<TEntity>();
             setupAction(config);
 
+            config.SiteBuilder ??= typeof(DefaultSiteBuilder);
+            services.AddSingleton(typeof(ISiteBuilder), config.SiteBuilder);
+
             if (config.EntityMapper == null)
             {
                 if (!typeof(TEntity).IsAssignableFrom(typeof(CatalogContentBase)))

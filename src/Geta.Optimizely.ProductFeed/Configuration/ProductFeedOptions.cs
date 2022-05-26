@@ -3,16 +3,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Geta.Optimizely.ProductFeed.Configuration
 {
     public class ProductFeedOptions
     {
+        public Type SiteBuilder { get; set; }
+
         public Type MappedEntity { get; set; }
     }
 
-    public class ProductFeedOptions<TEntity>
+    public class ProductFeedOptions<TEntity> : ProductFeedOptions
     {
         public string ConnectionString { get; set; }
 
@@ -35,15 +38,21 @@ namespace Geta.Optimizely.ProductFeed.Configuration
             return this;
         }
 
-        public ProductFeedOptions<TEntity> AddEnricher<TEnricher>() where TEnricher: IProductFeedContentEnricher<TEntity>
+        public ProductFeedOptions<TEntity> AddEnricher<TEnricher>() where TEnricher : IProductFeedContentEnricher<TEntity>
         {
             Enrichers.Add(typeof(TEnricher));
             return this;
         }
 
-        public ProductFeedOptions<TEntity> SetFilter<TFilter>() where TFilter: IProductFeedFilter<TEntity>
+        public ProductFeedOptions<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
         {
             Filter = typeof(TFilter);
+            return this;
+        }
+
+        public ProductFeedOptions<TEntity> SetSiteBuilder<TBuilder>() where TBuilder : ISiteBuilder
+        {
+            SiteBuilder = typeof(TBuilder);
             return this;
         }
     }

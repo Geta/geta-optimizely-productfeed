@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
@@ -22,9 +23,9 @@ namespace Geta.Optimizely.ProductFeed
 
         public FeedDescriptor Descriptor { get; private set; }
 
-        public virtual void BeginExport(CancellationToken cancellationToken) { }
+        public virtual void BeginExport(HostDefinition host, CancellationToken cancellationToken) { }
 
-        public virtual void BuildEntry(TEntity entity, CancellationToken cancellationToken)
+        public virtual void BuildEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
         {
             var shouldInclude = Filter?.ShouldInclude(entity) ?? true;
 
@@ -33,7 +34,7 @@ namespace Geta.Optimizely.ProductFeed
                 return;
             }
 
-            var entry = ConvertEntry(entity, cancellationToken);
+            var entry = ConvertEntry(entity, host, cancellationToken);
             if (entry == null)
             {
                 return;
@@ -48,16 +49,16 @@ namespace Geta.Optimizely.ProductFeed
 
         public abstract byte[] SerializeEntry(object value, CancellationToken cancellationToken);
 
-        public abstract object ConvertEntry(TEntity entity, CancellationToken cancellationToken);
+        public abstract object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken);
 
-        public virtual ICollection<FeedEntity> FinishExport(CancellationToken cancellationToken)
+        public virtual ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
         {
             return new[]
             {
                 new FeedEntity
                 {
                     CreatedUtc = DateTime.UtcNow,
-                    Link = $"{SiteUrlBuilder.BuildUrl().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
+                    Link = $"{host.Url.ToString().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
                     FeedBytes = Buffer.ToArray()
                 }
             };

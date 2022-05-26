@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using EPiServer.Reference.Commerce.Site.Features.Shared.Services;
 using EPiServer.Web;
 using Geta.Optimizely.ProductFeed;
@@ -13,21 +12,14 @@ namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
 {
     public class GoogleXmlConverter : IProductFeedConverter<MyCommerceProductRecord>
     {
-        private readonly IContentLoader _contentLoader;
         private readonly IPricingService _pricingService;
-        private readonly string _siteUrl;
 
-        public GoogleXmlConverter(
-            IContentLoader contentLoader,
-            IPricingService pricingService,
-            ISiteDefinitionRepository siteDefinitionRepository)
+        public GoogleXmlConverter(IPricingService pricingService)
         {
-            _contentLoader = contentLoader;
             _pricingService = pricingService;
-            _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
         }
 
-        public object Convert(MyCommerceProductRecord entity)
+        public object Convert(MyCommerceProductRecord entity, HostDefinition host)
         {
             var variantCode = entity.Code;
             var defaultPrice = _pricingService.GetDefaultPrice(variantCode);
@@ -37,7 +29,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
                 Id = variantCode,
                 Title = entity.DisplayName,
                 Description = entity.Description,
-                Link = entity.Url,
+                Link = host.Url + entity.Url,
                 Condition = "new",
                 Availability = "in stock",
                 Brand = entity.Brand,

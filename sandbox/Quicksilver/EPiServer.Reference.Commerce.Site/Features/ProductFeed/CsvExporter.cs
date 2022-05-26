@@ -1,3 +1,4 @@
+using EPiServer.Web;
 using Geta.Optimizely.ProductFeed;
 
 namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
@@ -5,7 +6,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.ProductFeed
 
     public class CsvConverter : IProductFeedConverter<MyCommerceProductRecord>
     {
-        public object Convert(MyCommerceProductRecord entity)
+        public object Convert(MyCommerceProductRecord entity, HostDefinition host)
         {
             return new CsvEntry
             {

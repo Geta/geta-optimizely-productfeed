@@ -12,6 +12,7 @@ namespace Geta.Optimizely.ProductFeed
 {
     public class ProcessingPipeline<TEntity>
     {
+        private readonly ISiteBuilder _siteBuilder;
         private readonly IProductFeedContentLoader _feedContentLoader;
         private readonly IEntityMapper<TEntity> _entityMapper;
         private readonly IEnumerable<IProductFeedContentEnricher<TEntity>> _enrichers;
@@ -21,6 +22,7 @@ namespace Geta.Optimizely.ProductFeed
         private readonly IProductFeedFilter<TEntity> _filter;
 
         public ProcessingPipeline(
+            ISiteBuilder siteBuilder,
             IProductFeedContentLoader feedContentLoader,
             IEntityMapper<TEntity> entityMapper,
             IEnumerable<IProductFeedContentEnricher<TEntity>> enrichers,
@@ -29,6 +31,7 @@ namespace Geta.Optimizely.ProductFeed
             IFeedRepository feedRepository,
             IProductFeedFilter<TEntity> filter = null)
         {
+            _siteBuilder = siteBuilder;
             _feedContentLoader = feedContentLoader;
             _entityMapper = entityMapper;
             _enrichers = enrichers;
@@ -40,6 +43,8 @@ namespace Geta.Optimizely.ProductFeed
 
         public void Process(JobStatusLogger logger, CancellationToken cancellationToken)
         {
+            logger.LogWithStatus(
+                $"Found {_feedDescriptors.Count()} ({string.Join(", ", _feedDescriptors.Select(f => f.Name))}) feeds. Build process starting...");
 
             var exporters = _feedDescriptors
                 .Select(d => _converterFactory(d))
@@ -60,34 +65,42 @@ namespace Geta.Optimizely.ProductFeed
                     return d;
                 });
 
-            // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
-            // render document start tag or do some other magic
-            foreach (var exporter in exporters)
+            foreach (var host in _siteBuilder.GetHosts())
             {
-                exporter.BeginExport(cancellationToken);
-            }
-
-            foreach (var d in sourceData)
-            {
+                // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
+                // render document start tag or do some other magic
                 foreach (var exporter in exporters)
                 {
-                    exporter.BuildEntry(d, cancellationToken);
+                    exporter.BeginExport(host, cancellationToken);
                 }
+
+                foreach (var d in sourceData)
+                {
+                    foreach (var exporter in exporters)
+                    {
+                        exporter.BuildEntry(d, host, cancellationToken);
+                    }
+                }
+
+                // dispose exporters - so we let them flush and wrap-up
+                foreach (var exporter in exporters)
+                {
+                    _feedRepository.Save(exporter.FinishExport(host, cancellationToken));
+                }
+
+                logger.LogWithStatus($"> Generated feeds for {host.Url} host.");
             }
 
-            // dispose exporters - so we let them flush and wrap-up
+            // let it go! let it go!
             foreach (var exporter in exporters)
             {
-                _feedRepository.Save(exporter.FinishExport(cancellationToken));
-
                 if (exporter is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
             }
 
-            logger.LogWithStatus(
-                $"Found {_feedDescriptors.Count()} ({string.Join(", ", _feedDescriptors.Select(f => f.Name))}) feeds. Build process starting...");
+            logger.LogWithStatus("Product feed generation completed.");
         }
     }
 }
