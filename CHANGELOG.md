@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0]
+
+* Added mult-site / multi-language support
+
 ## [2.1.0]
 
 * Option to specify entity filter
