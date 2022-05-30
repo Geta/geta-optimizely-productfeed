@@ -23,7 +23,7 @@ namespace Geta.Optimizely.ProductFeed.Google
             {
                 Updated = DateTime.UtcNow,
                 Title = "Google Product Feed",
-                Link = host.Url.ToString().TrimEnd('/') + '/' + Descriptor.FileName.TrimStart('/'),
+                Link = host?.Url.ToString().TrimEnd('/') + '/' + Descriptor.FileName.TrimStart('/'),
                 Entries = _entries.Where(e => e != null).ToList()
             };
 
