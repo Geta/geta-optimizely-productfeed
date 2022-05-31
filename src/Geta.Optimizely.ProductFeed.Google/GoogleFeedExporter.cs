@@ -15,6 +15,11 @@ namespace Geta.Optimizely.ProductFeed.Google
     {
         private readonly List<Entry> _entries = new();
 
+        public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
+        {
+            _entries.Clear();
+        }
+
         public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

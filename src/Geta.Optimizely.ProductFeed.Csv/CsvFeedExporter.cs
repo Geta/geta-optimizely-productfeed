@@ -21,11 +21,12 @@ namespace Geta.Optimizely.ProductFeed.Csv
         public CsvFeedExporter(CsvFeedDescriptor<TEntity> descriptor)
         {
             _descriptor = descriptor;
-            _writer = new CsvWriter(new StreamWriter(Buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
+            _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
         }
 
         public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
         {
+            _buffer = new MemoryStream();
             _writer.WriteHeader(_descriptor.CsvEntityType);
             _writer.NextRecord();
         }

@@ -63,7 +63,8 @@ namespace Geta.Optimizely.ProductFeed
                     }
 
                     return d;
-                });
+                })
+                .ToList();
 
             foreach (var host in _siteBuilder.GetHosts())
             {

@@ -13,7 +13,7 @@ namespace Geta.Optimizely.ProductFeed
 {
     public abstract class AbstractFeedContentExporter<TEntity>
     {
-        protected readonly MemoryStream Buffer = new();
+        protected MemoryStream _buffer = new();
 
         public IProductFeedConverter<TEntity> Converter { get; private set; }
 
@@ -43,7 +43,7 @@ namespace Geta.Optimizely.ProductFeed
             var serialized = SerializeEntry(entry, cancellationToken);
             if (serialized != null)
             {
-                Buffer.Write(serialized);
+                _buffer.Write(serialized);
             }
         }
 
@@ -59,7 +59,7 @@ namespace Geta.Optimizely.ProductFeed
                 {
                     CreatedUtc = DateTime.UtcNow,
                     Link = $"{host.Url.ToString().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
-                    FeedBytes = Buffer.ToArray()
+                    FeedBytes = _buffer.ToArray()
                 }
             };
         }
