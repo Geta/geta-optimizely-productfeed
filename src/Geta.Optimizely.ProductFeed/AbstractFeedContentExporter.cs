@@ -23,7 +23,10 @@ namespace Geta.Optimizely.ProductFeed
 
         public FeedDescriptor Descriptor { get; private set; }
 
-        public virtual void BeginExport(HostDefinition host, CancellationToken cancellationToken) { }
+        public virtual void BeginExport(HostDefinition host, CancellationToken cancellationToken)
+        {
+            _buffer = new();
+        }
 
         public virtual void BuildEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
         {

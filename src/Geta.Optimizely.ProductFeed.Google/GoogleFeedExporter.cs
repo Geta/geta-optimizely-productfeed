@@ -18,6 +18,7 @@ namespace Geta.Optimizely.ProductFeed.Google
         public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
         {
             _entries.Clear();
+            base.BeginExport(host, cancellationToken);
         }
 
         public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)

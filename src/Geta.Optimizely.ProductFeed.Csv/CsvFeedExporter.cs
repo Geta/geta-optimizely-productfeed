@@ -26,9 +26,10 @@ namespace Geta.Optimizely.ProductFeed.Csv
 
         public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
         {
-            _buffer = new MemoryStream();
             _writer.WriteHeader(_descriptor.CsvEntityType);
             _writer.NextRecord();
+
+            base.BeginExport(host, cancellationToken);
         }
 
         public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
