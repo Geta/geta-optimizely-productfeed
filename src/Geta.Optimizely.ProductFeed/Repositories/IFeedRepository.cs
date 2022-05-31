@@ -10,10 +10,10 @@ namespace Geta.Optimizely.ProductFeed.Repositories
 {
     public interface IFeedRepository
     {
-        FeedEntity GetLatestFeed(Uri siteHost);
+        FeedEntity GetLatestFeed(Uri siteUri);
 
         void Save(ICollection<FeedEntity> feedData);
 
-        FeedDescriptor FindDescriptorByUrl(string pathAndQuery);
+        FeedDescriptor FindDescriptorByUri(Uri siteUri);
     }
 }

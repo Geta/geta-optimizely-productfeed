@@ -29,7 +29,7 @@ namespace Geta.Optimizely.ProductFeed
                 return NotFound("Feed not found");
             }
 
-            var descriptor = _feedRepository.FindDescriptorByUrl(siteHost.PathAndQuery.TrimStart('/'));
+            var descriptor = _feedRepository.FindDescriptorByUri(siteHost);
 
             return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
         }
