@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.2.0]
+## [2.2.2]
 
 * Added mult-site / multi-language support
+* Fix for supporting multi-site feed serving procedure
 
 ## [2.1.0]
 
