@@ -87,6 +87,7 @@ namespace Geta.Optimizely.ProductFeed.Google.Models
 
         [XmlElement("multipack", Namespace = "http://base.google.com/ns/1.0")]
         public uint? Multipack { get; set; }
+        public bool ShouldSerializeMultipack() { return Multipack.HasValue; }
 
         [XmlElement("is_bundle", Namespace = "http://base.google.com/ns/1.0")]
         public string IsBundle { get; set; }
@@ -183,9 +184,11 @@ namespace Geta.Optimizely.ProductFeed.Google.Models
 
         [XmlElement("max_handling_time", Namespace = "http://base.google.com/ns/1.0")]
         public uint? MaxHandlingTime { get; set; }
+        public bool ShouldSerializeMaxHandlingTime() { return MaxHandlingTime.HasValue; }
 
         [XmlElement("min_handling_time", Namespace = "http://base.google.com/ns/1.0")]
         public uint? MinHandlingTime { get; set; }
+        public bool ShouldSerializeMinHandlingTime() { return MinHandlingTime.HasValue; }
 
         #endregion
 
