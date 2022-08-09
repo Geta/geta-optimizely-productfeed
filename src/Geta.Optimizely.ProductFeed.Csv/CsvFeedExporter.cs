@@ -16,20 +16,19 @@ namespace Geta.Optimizely.ProductFeed.Csv
     public class CsvFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
     {
         private readonly CsvFeedDescriptor<TEntity> _descriptor;
-        private readonly CsvWriter _writer;
+        private CsvWriter _writer;
 
         public CsvFeedExporter(CsvFeedDescriptor<TEntity> descriptor)
         {
             _descriptor = descriptor;
-            _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
         }
 
         public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
         {
+            base.BeginExport(host, cancellationToken);
+            _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
             _writer.WriteHeader(_descriptor.CsvEntityType);
             _writer.NextRecord();
-
-            base.BeginExport(host, cancellationToken);
         }
 
         public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
