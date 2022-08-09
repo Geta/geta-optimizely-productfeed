@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0]
+
+* Fixed CSV exporter (wrong destination buffer was used at the beginning of the export)
+
 ## [2.2.2]
 
 * Added mult-site / multi-language support
