@@ -38,6 +38,19 @@ services
 
 Here `MyCommerceProductRecord` is an entity to which a generic CatalogContentBase objects will be mapped to.
 
+Then you need to add mapping to serve feeds from configured URLs:
+
+```csharp
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    app.UseEndpoints(endpoints =>
+    {
+        ...
+        endpoints.MapProductFeeds();
+    });
+}
+```
+
 ## Processing Pipeline
 
 During the processing pipeline there are a few key moments to be aware of (you can override any of these mentioned below):
