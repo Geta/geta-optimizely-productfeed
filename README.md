@@ -158,7 +158,7 @@ Google Xml feed entity converter (`GoogleXmlConverter.cs`):
 ```csharp
 public class GoogleXmlConverter : IProductFeedConverter<MyCommerceProductRecord>
 {
-    public object Convert(MyCommerceProductRecord entity)
+    public object Convert(MyCommerceProductRecord entity, HostDefinition host)
     {
         return new Geta.Optimizely.ProductFeed.Google.Models.Entry
         {
@@ -215,7 +215,7 @@ CSV converter (`CsvConverter.cs`):
 ```csharp
 public class CsvConverter : IProductFeedConverter<MyCommerceProductRecord>
 {
-    public object Convert(MyCommerceProductRecord entity)
+    public object Convert(MyCommerceProductRecord entity, HostDefinition host)
     {
         return new CsvEntry
         {
