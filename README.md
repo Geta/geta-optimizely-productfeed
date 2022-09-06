@@ -36,7 +36,7 @@ services
     });
 ```
 
-Here `MyCommerceProductRecord` is an entity to which a generic CatalogContentBase objects will be mapped to.
+Here `MyCommerceProductRecord` is an entity to which a generic `CatalogContentBase` objects will be mapped to.
 
 Then you need to add mapping to serve feeds from configured URLs:
 
