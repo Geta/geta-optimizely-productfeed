@@ -8,7 +8,7 @@
   <ItemGroup>
     <None Include="wwwroot\**\*.*" />
     <EmbeddedResource Include="lang\**\*" />
-    <PackageReference Include="CsvHelper" Version="27.2.1" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="EPiServer.Commerce" Version="$(CommerceCoreVersion)" />
     <PackageReference Include="EPiServer.Personalization.Commerce" Version="$(CommerceTrackingeVersion)" />
     <PackageReference Include="Serilog" Version="$(SerilogVersion)" />
