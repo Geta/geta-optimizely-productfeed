@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0]
+
+* Target .NET 6.0
+* Upgrade Commerce version to v14.12.0
+
 ## [2.3.0]
 
 * Fixed CSV exporter (wrong destination buffer was used at the beginning of the export)
