@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1]
+
+* Fixed issue with internationalized domain name (https://github.com/Geta/geta-optimizely-productfeed/issues/14)
+
 ## [3.0.0]
 
 * Target .NET 6.0
