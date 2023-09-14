@@ -20,7 +20,7 @@ namespace Geta.Optimizely.ProductFeed
 
         public IActionResult Get()
         {
-            var host = HttpContext.Request.GetDisplayUrl();
+            var host = HttpContext.Request.GetEncodedUrl();
             var siteHost = new Uri(host);
             var feedInfo = _feedRepository.GetLatestFeed(siteHost);
 
