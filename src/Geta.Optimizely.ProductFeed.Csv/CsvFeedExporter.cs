@@ -13,21 +13,15 @@ using Geta.Optimizely.ProductFeed.Models;
 
 namespace Geta.Optimizely.ProductFeed.Csv;
 
-public class CsvFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
+public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : AbstractFeedContentExporter<TEntity>
 {
-    private readonly CsvFeedDescriptor<TEntity> _descriptor;
     private CsvWriter _writer;
-
-    public CsvFeedExporter(CsvFeedDescriptor<TEntity> descriptor)
-    {
-        _descriptor = descriptor;
-    }
 
     public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
     {
         base.BeginExport(host, cancellationToken);
         _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
-        _writer.WriteHeader(_descriptor.CsvEntityType);
+        _writer.WriteHeader(descriptor.CsvEntityType);
         _writer.NextRecord();
     }
 
@@ -41,7 +35,7 @@ public class CsvFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
         _writer.WriteRecord(value);
         _writer.NextRecord();
 
-        return Array.Empty<byte>();
+        return [];
     }
 
     public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)

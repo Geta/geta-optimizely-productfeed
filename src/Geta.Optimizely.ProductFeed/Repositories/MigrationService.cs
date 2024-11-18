@@ -11,18 +11,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace Geta.Optimizely.ProductFeed.Repositories;
 
-public class MigrationService : IHostedService
+public class MigrationService(IServiceProvider serviceProvider) : IHostedService
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public MigrationService(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         var myDbContext = scope.ServiceProvider.GetRequiredService<FeedApplicationDbContext>();
 
         await myDbContext.Database.MigrateAsync(cancellationToken);

@@ -33,13 +33,13 @@ public class GoogleFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
             Entries = _entries.Where(e => e != null).ToList()
         };
 
-        return new[]
-        {
+        return
+        [
             new FeedEntity
             {
                 CreatedUtc = f.Updated, Link = f.Link, FeedBytes = ObjectXmlSerializer.Serialize(f, typeof(Feed))
             }
-        };
+        ];
     }
 
     public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
@@ -54,6 +54,6 @@ public class GoogleFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
 
     public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
     {
-        return Array.Empty<byte>();
+        return [];
     }
 }

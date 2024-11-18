@@ -11,33 +11,23 @@ using Mediachase.Commerce.Catalog;
 
 namespace Geta.Optimizely.ProductFeed;
 
-public class DefaultProductFeedContentLoader : IProductFeedContentLoader
+public class DefaultProductFeedContentLoader(
+    IContentLoader contentLoader,
+    ReferenceConverter referenceConverter,
+    IContentLanguageAccessor languageAccessor)
+    : IProductFeedContentLoader
 {
-    private readonly IContentLoader _contentLoader;
-    private readonly IContentLanguageAccessor _languageAccessor;
-    private readonly ReferenceConverter _referenceConverter;
-
-    public DefaultProductFeedContentLoader(
-        IContentLoader contentLoader,
-        ReferenceConverter referenceConverter,
-        IContentLanguageAccessor languageAccessor)
-    {
-        _contentLoader = contentLoader;
-        _referenceConverter = referenceConverter;
-        _languageAccessor = languageAccessor;
-    }
-
     public IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
     {
-        var catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
-        var items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
+        var catalogReferences = contentLoader.GetDescendents(referenceConverter.GetRootLink());
+        var items = contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
 
         return items;
     }
 
     private LoaderOptions CreateDefaultLoadOption()
     {
-        var loaderOptions = new LoaderOptions { LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language) };
+        var loaderOptions = new LoaderOptions { LanguageLoaderOption.FallbackWithMaster(languageAccessor.Language) };
 
         return loaderOptions;
     }

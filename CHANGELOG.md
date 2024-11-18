@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.0.2]
+## [4.0.0]
+
+* Target .NET8
+* Package upgrades
+
+## [4.0.0]
 
 * Added command execution timeout configuration option for EF Core DbContext
 

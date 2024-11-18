@@ -56,15 +56,15 @@ public abstract class AbstractFeedContentExporter<TEntity>
 
     public virtual ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
     {
-        return new[]
-        {
+        return
+        [
             new FeedEntity
             {
                 CreatedUtc = DateTime.UtcNow,
                 Link = $"{host.Url.ToString().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
                 FeedBytes = _buffer.ToArray()
             }
-        };
+        ];
     }
 
     public void SetConverter(IProductFeedConverter<TEntity> converter)

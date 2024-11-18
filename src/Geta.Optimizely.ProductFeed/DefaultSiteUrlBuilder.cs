@@ -6,14 +6,9 @@ using EPiServer.Web;
 
 namespace Geta.Optimizely.ProductFeed;
 
-public class DefaultSiteUrlBuilder : ISiteUrlBuilder
+public class DefaultSiteUrlBuilder(ISiteDefinitionRepository siteDefinitionRepository) : ISiteUrlBuilder
 {
-    private readonly string _siteUrl;
-
-    public DefaultSiteUrlBuilder(ISiteDefinitionRepository siteDefinitionRepository)
-    {
-        _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
-    }
+    private readonly string _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
 
     public string BuildUrl()
     {

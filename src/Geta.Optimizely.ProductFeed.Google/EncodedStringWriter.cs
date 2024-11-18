@@ -6,12 +6,7 @@ using System.Text;
 
 namespace Geta.Optimizely.ProductFeed.Google;
 
-public sealed class EncodedStringWriter : StringWriter
+public sealed class EncodedStringWriter(Encoding encoding) : StringWriter
 {
-    public EncodedStringWriter(Encoding encoding)
-    {
-        Encoding = encoding;
-    }
-
-    public override Encoding Encoding { get; }
+    public override Encoding Encoding { get; } = encoding;
 }

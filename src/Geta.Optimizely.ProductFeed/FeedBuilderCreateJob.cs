@@ -45,7 +45,7 @@ public class FeedBuilderCreateJob : ScheduledJobBase
 
             if (mi != null)
             {
-                mi.Invoke(genericPipeline, new object[] { _jobStatusLogger, _cts.Token });
+                mi.Invoke(genericPipeline, [_jobStatusLogger, _cts.Token]);
             }
         }
         catch (Exception ex)
@@ -61,5 +61,6 @@ public class FeedBuilderCreateJob : ScheduledJobBase
     public override void Stop()
     {
         _cts.Cancel();
+        _cts.Dispose();
     }
 }

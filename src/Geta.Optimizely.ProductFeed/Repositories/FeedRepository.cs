@@ -13,17 +13,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Geta.Optimizely.ProductFeed.Repositories;
 
-public class FeedRepository : IFeedRepository
+public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnumerable<FeedDescriptor> descriptors) : IFeedRepository
 {
-    private readonly FeedApplicationDbContext _applicationDbContext;
-    private readonly IEnumerable<FeedDescriptor> _descriptors;
-
-    public FeedRepository(FeedApplicationDbContext applicationDbContext, IEnumerable<FeedDescriptor> descriptors)
-    {
-        _applicationDbContext = applicationDbContext;
-        _descriptors = descriptors;
-    }
-
     public FeedEntity GetLatestFeed(Uri siteUri)
     {
         if (siteUri == null)
@@ -32,7 +23,7 @@ public class FeedRepository : IFeedRepository
         }
 
         // we need to do client-side eval because string.Equals with comparison is not supported
-        var feedContent = _applicationDbContext
+        var feedContent = applicationDbContext
             .FeedData
             .ToList();
 
@@ -47,12 +38,12 @@ public class FeedRepository : IFeedRepository
             return;
         }
 
-        var feeds = _applicationDbContext.FeedData.ToList();
+        var feeds = applicationDbContext.FeedData.ToList();
 
         foreach (var data in feedData)
         {
             PrepareFeedData(feeds, data);
-            _applicationDbContext.SaveChanges();
+            applicationDbContext.SaveChanges();
         }
     }
 
@@ -63,12 +54,19 @@ public class FeedRepository : IFeedRepository
             return;
         }
 
-        var feeds = await AsyncEnumerable.ToListAsync(_applicationDbContext.FeedData, cancellationToken);
+        var feeds = await applicationDbContext.FeedData.ToListAsync(cancellationToken);
         foreach (var data in feedData)
         {
             PrepareFeedData(feeds, data);
-            await _applicationDbContext.SaveChangesAsync(cancellationToken);
+            await applicationDbContext.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    public FeedDescriptor FindDescriptorByUri(Uri siteUri)
+    {
+        var path = GetAbsoluteUrlWithoutQuery(siteUri).AbsolutePath.Trim('/');
+
+        return descriptors.FirstOrDefault(d => d.FileName.Trim('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private void PrepareFeedData(List<FeedEntity> feeds, FeedEntity data)
@@ -83,15 +81,8 @@ public class FeedRepository : IFeedRepository
         else
         {
             data.CreatedUtc = DateTime.UtcNow;
-            _applicationDbContext.FeedData.Add(data);
+            applicationDbContext.FeedData.Add(data);
         }
-    }
-
-    public FeedDescriptor FindDescriptorByUri(Uri siteUri)
-    {
-        var path = GetAbsoluteUrlWithoutQuery(siteUri).AbsolutePath.Trim('/');
-
-        return _descriptors.FirstOrDefault(d => d.FileName.Trim('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private Uri GetAbsoluteUrlWithoutQuery(Uri siteUri)

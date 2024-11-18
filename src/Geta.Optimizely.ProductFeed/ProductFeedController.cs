@@ -9,27 +9,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Geta.Optimizely.ProductFeed;
 
-public class ProductFeedController : ControllerBase
+public class ProductFeedController(IFeedRepository feedRepository) : ControllerBase
 {
-    private readonly IFeedRepository _feedRepository;
-
-    public ProductFeedController(IFeedRepository feedRepository)
-    {
-        _feedRepository = feedRepository;
-    }
-
     public IActionResult Get()
     {
         var host = HttpContext.Request.GetEncodedUrl();
         var siteHost = new Uri(host);
-        var feedInfo = _feedRepository.GetLatestFeed(siteHost);
+        var feedInfo = feedRepository.GetLatestFeed(siteHost);
 
         if (feedInfo == null)
         {
             return NotFound("Feed not found");
         }
 
-        var descriptor = _feedRepository.FindDescriptorByUri(siteHost);
+        var descriptor = feedRepository.FindDescriptorByUri(siteHost);
 
         return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
     }

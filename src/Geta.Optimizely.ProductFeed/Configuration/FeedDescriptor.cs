@@ -5,20 +5,13 @@ using System;
 
 namespace Geta.Optimizely.ProductFeed.Configuration;
 
-public class FeedDescriptor
+public class FeedDescriptor(string name, string fileName, string mimeType)
 {
-    public FeedDescriptor(string name, string fileName, string mimeType)
-    {
-        Name = name;
-        FileName = fileName;
-        MimeType = mimeType;
-    }
+    public string Name { get; set; } = name;
 
-    public string Name { get; set; }
+    public string FileName { get; set; } = fileName;
 
-    public string FileName { get; set; }
-
-    public string MimeType { get; set; }
+    public string MimeType { get; set; } = mimeType;
 
     public Type Exporter { get; set; }
 

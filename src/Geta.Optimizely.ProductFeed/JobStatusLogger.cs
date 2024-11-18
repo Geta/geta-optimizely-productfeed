@@ -6,16 +6,9 @@ using System.Text;
 
 namespace Geta.Optimizely.ProductFeed;
 
-public class JobStatusLogger
+public class JobStatusLogger(Action<string> onStatusChanged)
 {
-    private readonly Action<string> _onStatusChanged;
-
     private readonly StringBuilder _stringBuilder = new();
-
-    public JobStatusLogger(Action<string> onStatusChanged)
-    {
-        _onStatusChanged = onStatusChanged;
-    }
 
     public void Log(string message)
     {
@@ -31,7 +24,7 @@ public class JobStatusLogger
 
     public void Status(string message)
     {
-        _onStatusChanged?.Invoke(message);
+        onStatusChanged?.Invoke(message);
     }
 
     public string ToString(string separator = "<br />")

@@ -9,18 +9,11 @@ public interface ISiteBuilder
     IEnumerable<HostDefinition> GetHosts();
 }
 
-public class DefaultSiteBuilder : ISiteBuilder
+public class DefaultSiteBuilder(ISiteDefinitionRepository siteDefinitionRepository) : ISiteBuilder
 {
-    private readonly ISiteDefinitionRepository _siteDefinitionRepository;
-
-    public DefaultSiteBuilder(ISiteDefinitionRepository siteDefinitionRepository)
-    {
-        _siteDefinitionRepository = siteDefinitionRepository;
-    }
-
     public IEnumerable<HostDefinition> GetHosts()
     {
-        return _siteDefinitionRepository
+        return siteDefinitionRepository
             .List()
             .SelectMany(sd => sd.Hosts)
             .Where(h => h.Url != null);

@@ -6,10 +6,8 @@ using Geta.Optimizely.ProductFeed.Configuration;
 
 namespace Geta.Optimizely.ProductFeed.Csv;
 
-public class CsvFeedDescriptor<TEntity> : FeedDescriptor
+public class CsvFeedDescriptor<TEntity>() : FeedDescriptor("csv", "csv-feed", "text/plain")
 {
-    public CsvFeedDescriptor() : base("csv", "csv-feed", "text/plain") { }
-
     public Type CsvEntityType { get; set; }
 
     public CsvFeedDescriptor<TEntity> SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
