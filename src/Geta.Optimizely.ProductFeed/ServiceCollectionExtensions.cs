@@ -31,7 +31,7 @@ namespace Geta.Optimizely.ProductFeed
             services.AddTransient(provider =>
             {
                 var options = provider.GetRequiredService<IOptions<ProductFeedOptions<TEntity>>>();
-                return new FeedApplicationDbContext(options.Value.ConnectionString);
+                return new FeedApplicationDbContext(options.Value.ConnectionString, options.Value.CommandTimeout);
             });
 
             services.AddTransient<FeedBuilderCreateJob>();

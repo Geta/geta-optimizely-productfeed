@@ -3,17 +3,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.ProductFeed.Repositories
+namespace Geta.Optimizely.ProductFeed.Repositories;
+
+public interface IFeedRepository
 {
-    public interface IFeedRepository
-    {
-        FeedEntity GetLatestFeed(Uri siteUri);
+    FeedEntity GetLatestFeed(Uri siteUri);
 
-        void Save(ICollection<FeedEntity> feedData);
+    void Save(ICollection<FeedEntity> feedData);
 
-        FeedDescriptor FindDescriptorByUri(Uri siteUri);
-    }
+    Task SaveAsync(ICollection<FeedEntity> feedData, CancellationToken cancellationToken);
+
+    FeedDescriptor FindDescriptorByUri(Uri siteUri);
 }

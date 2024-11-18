@@ -124,6 +124,7 @@ namespace EPiServer.Reference.Commerce.Site
                 .AddProductFeed<MyCommerceProductRecord>(options =>
                 {
                     options.ConnectionString = _configuration.GetConnectionString("EPiServerDB");
+                    options.CommandTimeout = TimeSpan.FromMinutes(1);
 
                     options.SetEntityMapper<EntityMapper>();
 

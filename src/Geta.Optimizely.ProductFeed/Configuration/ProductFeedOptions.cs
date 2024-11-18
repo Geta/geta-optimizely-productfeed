@@ -27,6 +27,8 @@ namespace Geta.Optimizely.ProductFeed.Configuration
 
         public Type EntityMapper { get; set; }
 
+        public TimeSpan CommandTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
         public void Add(FeedDescriptor feedDescriptor)
         {
             Descriptors.Add(feedDescriptor);
