@@ -9,37 +9,36 @@ using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
 using Mediachase.Commerce.Catalog;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public class DefaultProductFeedContentLoader : IProductFeedContentLoader
 {
-    public class DefaultProductFeedContentLoader : IProductFeedContentLoader
+    private readonly IContentLoader _contentLoader;
+    private readonly IContentLanguageAccessor _languageAccessor;
+    private readonly ReferenceConverter _referenceConverter;
+
+    public DefaultProductFeedContentLoader(
+        IContentLoader contentLoader,
+        ReferenceConverter referenceConverter,
+        IContentLanguageAccessor languageAccessor)
     {
-        private readonly IContentLoader _contentLoader;
-        private readonly IContentLanguageAccessor _languageAccessor;
-        private readonly ReferenceConverter _referenceConverter;
+        _contentLoader = contentLoader;
+        _referenceConverter = referenceConverter;
+        _languageAccessor = languageAccessor;
+    }
 
-        public DefaultProductFeedContentLoader(
-            IContentLoader contentLoader,
-            ReferenceConverter referenceConverter,
-            IContentLanguageAccessor languageAccessor)
-        {
-            _contentLoader = contentLoader;
-            _referenceConverter = referenceConverter;
-            _languageAccessor = languageAccessor;
-        }
+    public IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
+    {
+        var catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
+        var items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
 
-        public IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken)
-        {
-            var catalogReferences = _contentLoader.GetDescendents(_referenceConverter.GetRootLink());
-            var items = _contentLoader.GetItems(catalogReferences, CreateDefaultLoadOption()).OfType<CatalogContentBase>();
+        return items;
+    }
 
-            return items;
-        }
+    private LoaderOptions CreateDefaultLoadOption()
+    {
+        var loaderOptions = new LoaderOptions { LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language) };
 
-        private LoaderOptions CreateDefaultLoadOption()
-        {
-            var loaderOptions = new LoaderOptions { LanguageLoaderOption.FallbackWithMaster(_languageAccessor.Language) };
-
-            return loaderOptions;
-        }
+        return loaderOptions;
     }
 }

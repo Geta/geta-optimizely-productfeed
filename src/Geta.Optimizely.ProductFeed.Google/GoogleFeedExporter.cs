@@ -9,52 +9,51 @@ using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.ProductFeed.Google
+namespace Geta.Optimizely.ProductFeed.Google;
+
+public class GoogleFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
 {
-    public class GoogleFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
+    private readonly List<Entry> _entries = new();
+
+    public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
     {
-        private readonly List<Entry> _entries = new();
+        _entries.Clear();
+        base.BeginExport(host, cancellationToken);
+    }
 
-        public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
+    public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var f = new Feed
         {
-            _entries.Clear();
-            base.BeginExport(host, cancellationToken);
-        }
+            Updated = DateTime.UtcNow,
+            Title = "Google Product Feed",
+            Link = host?.Url.ToString().TrimEnd('/') + '/' + Descriptor.FileName.TrimStart('/'),
+            Entries = _entries.Where(e => e != null).ToList()
+        };
 
-        public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
+        return new[]
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var f = new Feed
+            new FeedEntity
             {
-                Updated = DateTime.UtcNow,
-                Title = "Google Product Feed",
-                Link = host?.Url.ToString().TrimEnd('/') + '/' + Descriptor.FileName.TrimStart('/'),
-                Entries = _entries.Where(e => e != null).ToList()
-            };
+                CreatedUtc = f.Updated, Link = f.Link, FeedBytes = ObjectXmlSerializer.Serialize(f, typeof(Feed))
+            }
+        };
+    }
 
-            return new[]
-            {
-                new FeedEntity
-                {
-                    CreatedUtc = f.Updated, Link = f.Link, FeedBytes = ObjectXmlSerializer.Serialize(f, typeof(Feed))
-                }
-            };
-        }
+    public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var entry = (Entry)Converter.Convert(entity, host);
 
-        public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var entry = (Entry)Converter.Convert(entity, host);
+        _entries.Add(entry);
 
-            _entries.Add(entry);
+        return null;
+    }
 
-            return null;
-        }
-
-        public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
-        {
-            return Array.Empty<byte>();
-        }
+    public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
+    {
+        return Array.Empty<byte>();
     }
 }

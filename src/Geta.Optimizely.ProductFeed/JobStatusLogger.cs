@@ -4,39 +4,38 @@
 using System;
 using System.Text;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public class JobStatusLogger
 {
-    public class JobStatusLogger
+    private readonly Action<string> _onStatusChanged;
+
+    private readonly StringBuilder _stringBuilder = new();
+
+    public JobStatusLogger(Action<string> onStatusChanged)
     {
-        private readonly Action<string> _onStatusChanged;
+        _onStatusChanged = onStatusChanged;
+    }
 
-        private readonly StringBuilder _stringBuilder = new();
+    public void Log(string message)
+    {
+        _stringBuilder.AppendLine(message);
+    }
 
-        public JobStatusLogger(Action<string> onStatusChanged)
-        {
-            _onStatusChanged = onStatusChanged;
-        }
+    public void LogWithStatus(string message)
+    {
+        message = $"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} - {message}";
+        Status(message);
+        Log(message);
+    }
 
-        public void Log(string message)
-        {
-            _stringBuilder.AppendLine(message);
-        }
+    public void Status(string message)
+    {
+        _onStatusChanged?.Invoke(message);
+    }
 
-        public void LogWithStatus(string message)
-        {
-            message = $"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} - {message}";
-            Status(message);
-            Log(message);
-        }
-
-        public void Status(string message)
-        {
-            _onStatusChanged?.Invoke(message);
-        }
-
-        public string ToString(string separator = "<br />")
-        {
-            return _stringBuilder?.ToString().Replace(Environment.NewLine, separator);
-        }
+    public string ToString(string separator = "<br />")
+    {
+        return _stringBuilder?.ToString().Replace(Environment.NewLine, separator);
     }
 }

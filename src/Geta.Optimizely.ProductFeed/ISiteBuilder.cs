@@ -2,28 +2,27 @@ using System.Collections.Generic;
 using System.Linq;
 using EPiServer.Web;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public interface ISiteBuilder
 {
-    public interface ISiteBuilder
+    IEnumerable<HostDefinition> GetHosts();
+}
+
+public class DefaultSiteBuilder : ISiteBuilder
+{
+    private readonly ISiteDefinitionRepository _siteDefinitionRepository;
+
+    public DefaultSiteBuilder(ISiteDefinitionRepository siteDefinitionRepository)
     {
-        IEnumerable<HostDefinition> GetHosts();
+        _siteDefinitionRepository = siteDefinitionRepository;
     }
 
-    public class DefaultSiteBuilder : ISiteBuilder
+    public IEnumerable<HostDefinition> GetHosts()
     {
-        private readonly ISiteDefinitionRepository _siteDefinitionRepository;
-
-        public DefaultSiteBuilder(ISiteDefinitionRepository siteDefinitionRepository)
-        {
-            _siteDefinitionRepository = siteDefinitionRepository;
-        }
-
-        public IEnumerable<HostDefinition> GetHosts()
-        {
-            return _siteDefinitionRepository
-                .List()
-                .SelectMany(sd => sd.Hosts)
-                .Where(h => h.Url != null);
-        }
+        return _siteDefinitionRepository
+            .List()
+            .SelectMany(sd => sd.Hosts)
+            .Where(h => h.Url != null);
     }
 }

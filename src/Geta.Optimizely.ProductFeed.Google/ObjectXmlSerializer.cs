@@ -6,25 +6,24 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Geta.Optimizely.ProductFeed.Google
+namespace Geta.Optimizely.ProductFeed.Google;
+
+public static class ObjectXmlSerializer
 {
-    public static class ObjectXmlSerializer
+    public static byte[] Serialize(object value, Type type)
     {
-        public static byte[] Serialize(object value, Type type)
-        {
-            var serializer = new XmlSerializer(type, "http://www.w3.org/2005/Atom");
-            var namespaces = new XmlSerializerNamespaces();
-            namespaces.Add("g", "http://base.google.com/ns/1.0");
+        var serializer = new XmlSerializer(type, "http://www.w3.org/2005/Atom");
+        var namespaces = new XmlSerializerNamespaces();
+        namespaces.Add("g", "http://base.google.com/ns/1.0");
 
-            using var stringWriter = new EncodedStringWriter(Encoding.UTF8);
-            var xmlWriterSettings = new XmlWriterSettings { Indent = true };
-            using var xmlWriter =  XmlWriter.Create(stringWriter, xmlWriterSettings);
+        using var stringWriter = new EncodedStringWriter(Encoding.UTF8);
+        var xmlWriterSettings = new XmlWriterSettings { Indent = true };
+        using var xmlWriter =  XmlWriter.Create(stringWriter, xmlWriterSettings);
 
-            xmlWriter.WriteStartDocument();
-            serializer.Serialize(xmlWriter, value, namespaces);
-            xmlWriter.Close();
+        xmlWriter.WriteStartDocument();
+        serializer.Serialize(xmlWriter, value, namespaces);
+        xmlWriter.Close();
 
-            return Encoding.UTF8.GetBytes(stringWriter.ToString());
-        }
+        return Encoding.UTF8.GetBytes(stringWriter.ToString());
     }
 }

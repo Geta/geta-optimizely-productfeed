@@ -11,44 +11,43 @@ using CsvHelper.Configuration;
 using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.ProductFeed.Csv
+namespace Geta.Optimizely.ProductFeed.Csv;
+
+public class CsvFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
 {
-    public class CsvFeedExporter<TEntity> : AbstractFeedContentExporter<TEntity>
+    private readonly CsvFeedDescriptor<TEntity> _descriptor;
+    private CsvWriter _writer;
+
+    public CsvFeedExporter(CsvFeedDescriptor<TEntity> descriptor)
     {
-        private readonly CsvFeedDescriptor<TEntity> _descriptor;
-        private CsvWriter _writer;
+        _descriptor = descriptor;
+    }
 
-        public CsvFeedExporter(CsvFeedDescriptor<TEntity> descriptor)
-        {
-            _descriptor = descriptor;
-        }
+    public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
+    {
+        base.BeginExport(host, cancellationToken);
+        _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
+        _writer.WriteHeader(_descriptor.CsvEntityType);
+        _writer.NextRecord();
+    }
 
-        public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
-        {
-            base.BeginExport(host, cancellationToken);
-            _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
-            _writer.WriteHeader(_descriptor.CsvEntityType);
-            _writer.NextRecord();
-        }
+    public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
+    {
+        return Converter.Convert(entity, host);
+    }
 
-        public override object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
-        {
-            return Converter.Convert(entity, host);
-        }
+    public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
+    {
+        _writer.WriteRecord(value);
+        _writer.NextRecord();
 
-        public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
-        {
-            _writer.WriteRecord(value);
-            _writer.NextRecord();
+        return Array.Empty<byte>();
+    }
 
-            return Array.Empty<byte>();
-        }
+    public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
+    {
+        _writer.Flush();
 
-        public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
-        {
-            _writer.Flush();
-
-            return base.FinishExport(host, cancellationToken);
-        }
+        return base.FinishExport(host, cancellationToken);
     }
 }

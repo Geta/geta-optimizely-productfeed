@@ -4,17 +4,16 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Geta.Optimizely.ProductFeed.Models
+namespace Geta.Optimizely.ProductFeed.Models;
+
+public class FeedEntity
 {
-    public class FeedEntity
-    {
-        public DateTime CreatedUtc { get; set; }
+    public DateTime CreatedUtc { get; set; }
 
-        public byte[] FeedBytes { get; set; }
+    public byte[] FeedBytes { get; set; }
 
-        public string Link { get; set; }
+    public string Link { get; set; }
 
-        [Key]
-        public int Id { get; set; }
-    }
+    [Key]
+    public int Id { get; set; }
 }

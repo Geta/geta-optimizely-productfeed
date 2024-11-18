@@ -5,22 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Geta.Optimizely.ProductFeed.Google.Models
+namespace Geta.Optimizely.ProductFeed.Google.Models;
+
+[XmlRoot("feed")]
+[Serializable]
+public class Feed
 {
-    [XmlRoot("feed")]
-    [Serializable]
-    public class Feed
-    {
-        [XmlElement("title")]
-        public string Title { get; set; }
+    [XmlElement("title")]
+    public string Title { get; set; }
 
-        [XmlElement("link")]
-        public string Link { get; set; }
+    [XmlElement("link")]
+    public string Link { get; set; }
 
-        [XmlElement("updated")]
-        public DateTime Updated { get; set; }
+    [XmlElement("updated")]
+    public DateTime Updated { get; set; }
 
-        [XmlElement("entry")]
-        public List<Entry> Entries { get; set; }
-    }
+    [XmlElement("entry")]
+    public List<Entry> Entries { get; set; }
 }

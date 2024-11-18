@@ -4,20 +4,19 @@
 using System.Linq;
 using EPiServer.Web;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public class DefaultSiteUrlBuilder : ISiteUrlBuilder
 {
-    public class DefaultSiteUrlBuilder : ISiteUrlBuilder
+    private readonly string _siteUrl;
+
+    public DefaultSiteUrlBuilder(ISiteDefinitionRepository siteDefinitionRepository)
     {
-        private readonly string _siteUrl;
+        _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
+    }
 
-        public DefaultSiteUrlBuilder(ISiteDefinitionRepository siteDefinitionRepository)
-        {
-            _siteUrl = siteDefinitionRepository.List().FirstOrDefault()?.SiteUrl.ToString();
-        }
-
-        public string BuildUrl()
-        {
-            return _siteUrl;
-        }
+    public string BuildUrl()
+    {
+        return _siteUrl;
     }
 }

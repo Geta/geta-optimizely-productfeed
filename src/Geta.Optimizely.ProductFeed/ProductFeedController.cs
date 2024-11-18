@@ -7,31 +7,30 @@ using Geta.Optimizely.ProductFeed.Repositories;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public class ProductFeedController : ControllerBase
 {
-    public class ProductFeedController : ControllerBase
+    private readonly IFeedRepository _feedRepository;
+
+    public ProductFeedController(IFeedRepository feedRepository)
     {
-        private readonly IFeedRepository _feedRepository;
+        _feedRepository = feedRepository;
+    }
 
-        public ProductFeedController(IFeedRepository feedRepository)
+    public IActionResult Get()
+    {
+        var host = HttpContext.Request.GetEncodedUrl();
+        var siteHost = new Uri(host);
+        var feedInfo = _feedRepository.GetLatestFeed(siteHost);
+
+        if (feedInfo == null)
         {
-            _feedRepository = feedRepository;
+            return NotFound("Feed not found");
         }
 
-        public IActionResult Get()
-        {
-            var host = HttpContext.Request.GetEncodedUrl();
-            var siteHost = new Uri(host);
-            var feedInfo = _feedRepository.GetLatestFeed(siteHost);
+        var descriptor = _feedRepository.FindDescriptorByUri(siteHost);
 
-            if (feedInfo == null)
-            {
-                return NotFound("Feed not found");
-            }
-
-            var descriptor = _feedRepository.FindDescriptorByUri(siteHost);
-
-            return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
-        }
+        return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
     }
 }

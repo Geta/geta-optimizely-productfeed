@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public interface IProductFeedContentLoader
 {
-    public interface IProductFeedContentLoader
-    {
-        IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken);
-    }
+    IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken);
 }

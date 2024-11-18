@@ -9,82 +9,81 @@ using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Models;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public abstract class AbstractFeedContentExporter<TEntity>
 {
-    public abstract class AbstractFeedContentExporter<TEntity>
+    protected MemoryStream _buffer = new();
+
+    public IProductFeedConverter<TEntity> Converter { get; private set; }
+
+    public IProductFeedFilter<TEntity> Filter { get; private set; }
+
+    public ISiteUrlBuilder SiteUrlBuilder { get; private set; }
+
+    public FeedDescriptor Descriptor { get; private set; }
+
+    public virtual void BeginExport(HostDefinition host, CancellationToken cancellationToken)
     {
-        protected MemoryStream _buffer = new();
+        _buffer = new();
+    }
 
-        public IProductFeedConverter<TEntity> Converter { get; private set; }
+    public virtual void BuildEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
+    {
+        var shouldInclude = Filter?.ShouldInclude(entity) ?? true;
 
-        public IProductFeedFilter<TEntity> Filter { get; private set; }
-
-        public ISiteUrlBuilder SiteUrlBuilder { get; private set; }
-
-        public FeedDescriptor Descriptor { get; private set; }
-
-        public virtual void BeginExport(HostDefinition host, CancellationToken cancellationToken)
+        if (!shouldInclude)
         {
-            _buffer = new();
+            return;
         }
 
-        public virtual void BuildEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken)
+        var entry = ConvertEntry(entity, host, cancellationToken);
+        if (entry == null)
         {
-            var shouldInclude = Filter?.ShouldInclude(entity) ?? true;
+            return;
+        }
 
-            if (!shouldInclude)
+        var serialized = SerializeEntry(entry, cancellationToken);
+        if (serialized != null)
+        {
+            _buffer.Write(serialized);
+        }
+    }
+
+    public abstract byte[] SerializeEntry(object value, CancellationToken cancellationToken);
+
+    public abstract object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken);
+
+    public virtual ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
+    {
+        return new[]
+        {
+            new FeedEntity
             {
-                return;
+                CreatedUtc = DateTime.UtcNow,
+                Link = $"{host.Url.ToString().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
+                FeedBytes = _buffer.ToArray()
             }
+        };
+    }
 
-            var entry = ConvertEntry(entity, host, cancellationToken);
-            if (entry == null)
-            {
-                return;
-            }
+    public void SetConverter(IProductFeedConverter<TEntity> converter)
+    {
+        Converter = converter;
+    }
 
-            var serialized = SerializeEntry(entry, cancellationToken);
-            if (serialized != null)
-            {
-                _buffer.Write(serialized);
-            }
-        }
+    public void SetFilter(IProductFeedFilter<TEntity> filter)
+    {
+        Filter = filter;
+    }
 
-        public abstract byte[] SerializeEntry(object value, CancellationToken cancellationToken);
+    public void SetSiteUrlBuilder(ISiteUrlBuilder urlBuilder)
+    {
+        SiteUrlBuilder = urlBuilder;
+    }
 
-        public abstract object ConvertEntry(TEntity entity, HostDefinition host, CancellationToken cancellationToken);
-
-        public virtual ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
-        {
-            return new[]
-            {
-                new FeedEntity
-                {
-                    CreatedUtc = DateTime.UtcNow,
-                    Link = $"{host.Url.ToString().TrimEnd('/')}/{Descriptor.FileName.TrimStart('/')}",
-                    FeedBytes = _buffer.ToArray()
-                }
-            };
-        }
-
-        public void SetConverter(IProductFeedConverter<TEntity> converter)
-        {
-            Converter = converter;
-        }
-
-        public void SetFilter(IProductFeedFilter<TEntity> filter)
-        {
-            Filter = filter;
-        }
-
-        public void SetSiteUrlBuilder(ISiteUrlBuilder urlBuilder)
-        {
-            SiteUrlBuilder = urlBuilder;
-        }
-
-        public void SetDescriptor(FeedDescriptor feedDescriptor)
-        {
-            Descriptor = feedDescriptor;
-        }
+    public void SetDescriptor(FeedDescriptor feedDescriptor)
+    {
+        Descriptor = feedDescriptor;
     }
 }

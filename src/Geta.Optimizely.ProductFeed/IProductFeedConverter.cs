@@ -3,10 +3,9 @@
 
 using EPiServer.Web;
 
-namespace Geta.Optimizely.ProductFeed
+namespace Geta.Optimizely.ProductFeed;
+
+public interface IProductFeedConverter<in TEntity>
 {
-    public interface IProductFeedConverter<in TEntity>
-    {
-        object Convert(TEntity entity, HostDefinition host);
-    }
+    object Convert(TEntity entity, HostDefinition host);
 }

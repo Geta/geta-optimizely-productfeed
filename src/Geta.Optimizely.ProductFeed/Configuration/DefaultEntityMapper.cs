@@ -3,13 +3,12 @@
 
 using EPiServer.Commerce.Catalog.ContentTypes;
 
-namespace Geta.Optimizely.ProductFeed.Configuration
+namespace Geta.Optimizely.ProductFeed.Configuration;
+
+public class DefaultEntityMapper : IEntityMapper<CatalogContentBase>
 {
-    public class DefaultEntityMapper : IEntityMapper<CatalogContentBase>
+    public CatalogContentBase Map(CatalogContentBase catalogContent)
     {
-        public CatalogContentBase Map(CatalogContentBase catalogContent)
-        {
-            return catalogContent;
-        }
+        return catalogContent;
     }
 }

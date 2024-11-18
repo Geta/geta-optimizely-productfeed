@@ -4,23 +4,22 @@
 using System;
 using Geta.Optimizely.ProductFeed.Configuration;
 
-namespace Geta.Optimizely.ProductFeed.Google
+namespace Geta.Optimizely.ProductFeed.Google;
+
+public static class ProductFeedOptionsExtensions
 {
-    public static class ProductFeedOptionsExtensions
+    public static ProductFeedOptions<TEntity> AddGoogleXmlExport<TEntity>(
+        this ProductFeedOptions<TEntity> options,
+        Action<GoogleFeedDescriptor<TEntity>> setupAction)
     {
-        public static ProductFeedOptions<TEntity> AddGoogleXmlExport<TEntity>(
-            this ProductFeedOptions<TEntity> options,
-            Action<GoogleFeedDescriptor<TEntity>> setupAction)
-        {
-            var descriptor = new GoogleFeedDescriptor<TEntity>();
+        var descriptor = new GoogleFeedDescriptor<TEntity>();
 
-            descriptor.SetExporter<GoogleFeedExporter<TEntity>, TEntity>();
-            descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
+        descriptor.SetExporter<GoogleFeedExporter<TEntity>, TEntity>();
+        descriptor.SetSiteUrlBuilder<DefaultSiteUrlBuilder>();
 
-            setupAction(descriptor);
-            options.Add(descriptor);
+        setupAction(descriptor);
+        options.Add(descriptor);
 
-            return options;
-        }
+        return options;
     }
 }

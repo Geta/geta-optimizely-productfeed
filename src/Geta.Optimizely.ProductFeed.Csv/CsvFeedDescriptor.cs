@@ -4,24 +4,23 @@
 using System;
 using Geta.Optimizely.ProductFeed.Configuration;
 
-namespace Geta.Optimizely.ProductFeed.Csv
+namespace Geta.Optimizely.ProductFeed.Csv;
+
+public class CsvFeedDescriptor<TEntity> : FeedDescriptor
 {
-    public class CsvFeedDescriptor<TEntity> : FeedDescriptor
+    public CsvFeedDescriptor() : base("csv", "csv-feed", "text/plain") { }
+
+    public Type CsvEntityType { get; set; }
+
+    public CsvFeedDescriptor<TEntity> SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
     {
-        public CsvFeedDescriptor() : base("csv", "csv-feed", "text/plain") { }
+        Converter = typeof(TConverter);
+        return this;
+    }
 
-        public Type CsvEntityType { get; set; }
-
-        public CsvFeedDescriptor<TEntity> SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
-        {
-            Converter = typeof(TConverter);
-            return this;
-        }
-
-        public CsvFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
-        {
-            Filter = typeof(TFilter);
-            return this;
-        }
+    public CsvFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
+    {
+        Filter = typeof(TFilter);
+        return this;
     }
 }

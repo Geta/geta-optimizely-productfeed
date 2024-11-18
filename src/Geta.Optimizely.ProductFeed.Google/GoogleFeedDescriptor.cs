@@ -3,22 +3,21 @@
 
 using Geta.Optimizely.ProductFeed.Configuration;
 
-namespace Geta.Optimizely.ProductFeed.Google
+namespace Geta.Optimizely.ProductFeed.Google;
+
+public class GoogleFeedDescriptor<TEntity> : FeedDescriptor
 {
-    public class GoogleFeedDescriptor<TEntity> : FeedDescriptor
+    public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml") { }
+
+    public GoogleFeedDescriptor<TEntity> SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
     {
-        public GoogleFeedDescriptor() : base("google", "/googleproductfeed", "application/xml") { }
+        Converter = typeof(TConverter);
+        return this;
+    }
 
-        public GoogleFeedDescriptor<TEntity> SetConverter<TConverter>() where TConverter : IProductFeedConverter<TEntity>
-        {
-            Converter = typeof(TConverter);
-            return this;
-        }
-
-        public GoogleFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
-        {
-            Filter = typeof(TFilter);
-            return this;
-        }
+    public GoogleFeedDescriptor<TEntity> SetFilter<TFilter>() where TFilter : IProductFeedFilter<TEntity>
+    {
+        Filter = typeof(TFilter);
+        return this;
     }
 }

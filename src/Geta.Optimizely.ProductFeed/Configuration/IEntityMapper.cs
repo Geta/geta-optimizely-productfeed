@@ -3,10 +3,9 @@
 
 using EPiServer.Commerce.Catalog.ContentTypes;
 
-namespace Geta.Optimizely.ProductFeed.Configuration
+namespace Geta.Optimizely.ProductFeed.Configuration;
+
+public interface IEntityMapper<out TEntity>
 {
-    public interface IEntityMapper<out TEntity>
-    {
-        public TEntity Map(CatalogContentBase catalogContent);
-    }
+    public TEntity Map(CatalogContentBase catalogContent);
 }
