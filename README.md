@@ -4,9 +4,9 @@
 
 ![](https://tc.geta.no/app/rest/builds/buildType:(id:GetaPackages_OptimizelyGoogleProductFeed_00ci),branch:master/statusIcon)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Geta_geta-optimizely-productfeed&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Geta_geta-optimizely-productfeed)
-[![Platform](https://img.shields.io/badge/Platform-.NET%205-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
+[![Platform](https://img.shields.io/badge/Platform-.NET%208-blue.svg?style=flat)](https://docs.microsoft.com/en-us/dotnet/)
 [![Platform](https://img.shields.io/badge/Optimizely-%2012-orange.svg?style=flat)](http://world.episerver.com/cms/)
-[![Platform](https://img.shields.io/badge/Optimizely%20Commerce-14-orange.svg?style=flat)](http://world.episerver.com/commerce/)
+[![Platform](https://img.shields.io/badge/Optimizely%20Commerce-14.30-orange.svg?style=flat)](http://world.episerver.com/commerce/)
 
 Credits: [How to make a Google Shopping Feed with C# and serve it through the Web API](http://blog.codenamed.nl/2015/05/14/creating-a-google-shopping-feed-with-c/).
 
