@@ -1,13 +1,11 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
 using CsvHelper;
-using CsvHelper.Configuration;
 using EPiServer.Web;
 using Geta.Optimizely.ProductFeed.Models;
 
@@ -20,7 +18,7 @@ public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : A
     public override void BeginExport(HostDefinition host, CancellationToken cancellationToken)
     {
         base.BeginExport(host, cancellationToken);
-        _writer = new CsvWriter(new StreamWriter(_buffer), new CsvConfiguration(CultureInfo.InvariantCulture));
+        _writer = new CsvWriter(new StreamWriter(_buffer), CultureInfo.InvariantCulture);
         _writer.WriteHeader(descriptor.CsvEntityType);
         _writer.NextRecord();
     }
