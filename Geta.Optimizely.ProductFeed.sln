@@ -5,16 +5,6 @@ VisualStudioVersion = 17.2.32317.152
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed", "src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj", "{D20EADEE-A3BE-4D07-94A6-1D5FB74FC00B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{C8506E1D-8573-4F07-8EE5-C6B93FAC0708}"
-	ProjectSection(SolutionItems) = preProject
-		sandbox\dependencies.props = sandbox\dependencies.props
-		sandbox\Quicksilver\docker-compose.yml = sandbox\Quicksilver\docker-compose.yml
-		sandbox\Quicksilver\Sql.Dockerfile = sandbox\Quicksilver\Sql.Dockerfile
-		sandbox\Quicksilver\Web.Dockerfile = sandbox\Quicksilver\Web.Dockerfile
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EPiServer.Reference.Commerce.Site", "sandbox\Quicksilver\EPiServer.Reference.Commerce.Site\EPiServer.Reference.Commerce.Site.csproj", "{D7601C31-87F8-4D3C-B17F-6FA7967D679B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.EfDesign", "src\Geta.Optimizely.ProductFeed.EfDesign\Geta.Optimizely.ProductFeed.EfDesign.csproj", "{03169E46-5F5E-4BE0-A24A-81A86B7095E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Google", "src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj", "{2545CF06-EFDB-4365-B595-02E2CBCA7BCC}"
@@ -33,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Csv", "src\Geta.Optimizely.ProductFeed.Csv\Geta.Optimizely.ProductFeed.Csv.csproj", "{6787C1D8-6897-4350-8925-D3E3443EB82C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "tests\ClassLibrary\ClassLibrary.csproj", "{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,10 +33,6 @@ Global
 		{D20EADEE-A3BE-4D07-94A6-1D5FB74FC00B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D20EADEE-A3BE-4D07-94A6-1D5FB74FC00B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D20EADEE-A3BE-4D07-94A6-1D5FB74FC00B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7601C31-87F8-4D3C-B17F-6FA7967D679B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7601C31-87F8-4D3C-B17F-6FA7967D679B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7601C31-87F8-4D3C-B17F-6FA7967D679B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7601C31-87F8-4D3C-B17F-6FA7967D679B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03169E46-5F5E-4BE0-A24A-81A86B7095E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -65,17 +49,11 @@ Global
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D7601C31-87F8-4D3C-B17F-6FA7967D679B} = {C8506E1D-8573-4F07-8EE5-C6B93FAC0708}
-		{3C3ACDBB-0E4B-430C-B1EA-6979A2FA23DB} = {C8506E1D-8573-4F07-8EE5-C6B93FAC0708}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD6AE611-DE9D-4DB1-AF35-47D0ED77EF8C}

@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\sandbox\Quicksilver\EPiServer.Reference.Commerce.Site\EPiServer.Reference.Commerce.Site.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
   </ItemGroup>
