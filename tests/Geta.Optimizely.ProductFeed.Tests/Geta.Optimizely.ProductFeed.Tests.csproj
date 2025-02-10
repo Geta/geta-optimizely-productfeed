@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
   </ItemGroup>

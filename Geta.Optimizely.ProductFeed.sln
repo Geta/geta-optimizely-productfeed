@@ -23,6 +23,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geta.Optimizely.ProductFeed.Csv", "src\Geta.Optimizely.ProductFeed.Csv\Geta.Optimizely.ProductFeed.Csv.csproj", "{6787C1D8-6897-4350-8925-D3E3443EB82C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{67CA8ABE-4EAE-4AA5-BBFB-9A71779CBD93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation", "sandbox\geta-packages-foundation-sandbox\src\Foundation\Foundation.csproj", "{6E345E16-CC40-4223-81FD-4A762B500C00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.AppHost", "sandbox\geta-packages-foundation-sandbox\src\Foundation.AppHost\Foundation.AppHost.csproj", "{B37D7040-5D67-4694-825B-5DA168186A5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geta.Optimizely.ProductFeed.Web", "src\Geta.Optimizely.ProductFeed.Web\Geta.Optimizely.ProductFeed.Web.csproj", "{E5911482-864E-4E50-AF8E-B7835FB4B998}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,11 +57,25 @@ Global
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6787C1D8-6897-4350-8925-D3E3443EB82C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E345E16-CC40-4223-81FD-4A762B500C00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E345E16-CC40-4223-81FD-4A762B500C00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E345E16-CC40-4223-81FD-4A762B500C00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E345E16-CC40-4223-81FD-4A762B500C00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B37D7040-5D67-4694-825B-5DA168186A5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37D7040-5D67-4694-825B-5DA168186A5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37D7040-5D67-4694-825B-5DA168186A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37D7040-5D67-4694-825B-5DA168186A5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5911482-864E-4E50-AF8E-B7835FB4B998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5911482-864E-4E50-AF8E-B7835FB4B998}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5911482-864E-4E50-AF8E-B7835FB4B998}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5911482-864E-4E50-AF8E-B7835FB4B998}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{6E345E16-CC40-4223-81FD-4A762B500C00} = {67CA8ABE-4EAE-4AA5-BBFB-9A71779CBD93}
+		{B37D7040-5D67-4694-825B-5DA168186A5E} = {67CA8ABE-4EAE-4AA5-BBFB-9A71779CBD93}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD6AE611-DE9D-4DB1-AF35-47D0ED77EF8C}
