@@ -248,16 +248,50 @@ Populating the feed is handled through a scheduled job and the result is seriali
 
 If your request to `/googleproductfeed` (or any other path that you configured for the feed) returns 404 with message `No feed generated`, make sure you run the job to populate the feed.
 
-## Local development setup
+## How to run locally
 
-See description in [shared repository](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up) regarding how to setup local development environment.
+Install required dependencies [click](https://github.com/Geta/geta-packages-foundation-sandbox#prerequisites)
 
-### Docker hostnames
+### Option 1: Aspire Project (Recommended)
+1. **Checkout repository with submodule**
+   ```bash
+   git clone https://github.com/Geta/geta-optimizely-productfeed
+   cd geta-optimizely-productfeed
+   git submodule update --init
 
-Instead of using the static IP addresses the following hostnames can be used out-of-the-box.
+2. **Run application**
+   ```bash
+   Turn on docker
+   cd sandbox/geta-packages-foundation-sandbox/src/Foundation.AppHost
+   dotnet run --project Foundation.AppHost
 
-http://googleproductfeed.getalocaltest.me
-http://manager-googleproductfeed.getalocaltest.me
+3. **Access Dashboard**
+   ```
+   Open the Aspire dashboard and navigate from the dashboard to https://localhost:5001/
+
+### Option 2: Regular project
+1. **Checkout repository**
+   ```bash
+   git clone https://github.com/Geta/geta-optimizely-productfeed
+   cd geta-optimizely-productfeed
+2. **Setup Environment**
+   ```bash
+    cd sandbox/geta-packages-foundation-sandbox
+    # Windows
+    setup.cmd
+    
+    # macOS/Linux
+    chmod +x setup.sh
+    ./setup.sh
+3. **Run application**
+   ```bash
+   dotnet run --project ./src/Geta.Optimizely.ProductFeed/Geta.Optimizely.ProductFeed.Web.csproj
+---
+
+
+CMS username: admin@example.com
+
+Password: Episerver123!
 
 
 ## Package maintainer
