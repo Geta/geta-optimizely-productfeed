@@ -274,6 +274,7 @@ Install required dependencies [click](https://github.com/Geta/geta-packages-foun
    ```bash
    git clone https://github.com/Geta/geta-optimizely-productfeed
    cd geta-optimizely-productfeed
+   git submodule update --init
 2. **Setup Environment**
    ```bash
     cd sandbox/geta-packages-foundation-sandbox
