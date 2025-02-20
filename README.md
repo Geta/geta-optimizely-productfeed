@@ -248,16 +248,57 @@ Populating the feed is handled through a scheduled job and the result is seriali
 
 If your request to `/googleproductfeed` (or any other path that you configured for the feed) returns 404 with message `No feed generated`, make sure you run the job to populate the feed.
 
-## Local development setup
+## 🏁 Getting Started
 
-See description in [shared repository](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up) regarding how to setup local development environment.
+### 📦 Prerequisites
 
-### Docker hostnames
+Ensure your system is properly configured to meet all prerequisites for Geta Foundation Core listed [here](https://github.com/Geta/geta-foundation-core#%EF%B8%8F-prerequisites)
 
-Instead of using the static IP addresses the following hostnames can be used out-of-the-box.
+### 🐑 Cloning the repository
 
-http://googleproductfeed.getalocaltest.me
-http://manager-googleproductfeed.getalocaltest.me
+```bash
+    git clone https://github.com/Geta/geta-optimizely-productfeed.git
+    cd geta-optimizely-productfeed
+    git submodule update --init
+```
+
+### 🚀 Running with Aspire (Recommended)
+```bash
+    # Windows
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
+
+    # Linux / MacOS
+    sudo env "PATH=$PATH" bash
+    chmod +x sub/geta-foundation-core/src/Foundation/docker/build-script/*.sh
+    cd sub/geta-foundation-core/src/Foundation.AppHost
+    dotnet run
+```
+
+### 🖥️ Running as Standalone
+```bash
+   # Windows
+   cd sub/geta-foundation-core
+   ./setup.cmd
+   cd ../../src/Geta.Optimizely.ProductFeed.Web
+   dotnet run
+
+   # Linux / MacOS
+   sudo env "PATH=$PATH" bash
+   cd sub/geta-foundation-core
+   chmod +x *.sh
+   ./setup.sh
+   cd ../../src/Geta.Optimizely.ProductFeed.Web
+   dotnet run
+```
+
+If you run into any issues, check the FAQ section [here](https://github.com/Geta/geta-foundation-web?tab=readme-ov-file#faq) 
+
+---
+
+CMS username: admin@example.com
+
+Password: Episerver123!
 
 
 ## Package maintainer

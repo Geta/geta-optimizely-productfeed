@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using EPiServer.Commerce.Catalog.ContentTypes;
-using EPiServer.Reference.Commerce.Site.Features.Product.Models;
 using EPiServer.Web;
+using Foundation.Features.CatalogContent.Product;
 using Geta.Optimizely.ProductFeed.Google;
 using Geta.Optimizely.ProductFeed.Google.Models;
 using Xunit;
@@ -52,11 +52,11 @@ public class SimpleSerializationTests
         Assert.NotNull(result);
     }
 
-    private static IEnumerable<FashionProduct> LoadSourceData()
+    private static IEnumerable<GenericProduct> LoadSourceData()
     {
         for (var i = 0; i < 10; i++)
         {
-            yield return new FashionProduct { Code = i.ToString() };
+            yield return new GenericProduct { Code = i.ToString() };
         }
     }
 }
@@ -78,7 +78,7 @@ public class BrandEnricher2 : IProductFeedContentEnricher<CatalogContentBase>
 {
     public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
     {
-        var fashionProduct = (FashionProduct)sourceData;
+        var fashionProduct = (GenericProduct)sourceData;
         fashionProduct.Brand = $"brand {fashionProduct.Code}";
 
         return sourceData;
@@ -89,7 +89,7 @@ public class BrandEnricher1 : IProductFeedContentEnricher<CatalogContentBase>
 {
     public CatalogContentBase Enrich(CatalogContentBase sourceData, CancellationToken cancellationToken)
     {
-        ((FashionProduct)sourceData).Brand += " %";
+        ((GenericProduct)sourceData).Brand += " %";
 
         return sourceData;
     }
