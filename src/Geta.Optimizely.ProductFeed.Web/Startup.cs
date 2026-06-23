@@ -55,13 +55,17 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        _foundationStartup.Configure(app,
-                                     env,
-                                     endpoints =>
-                                     {
-                                         endpoints.MapContent();
-                                         endpoints.MapRazorPages();
-                                         endpoints.MapProductFeeds();
-                                     });
+        // Foundation.Configure now sets up routing and maps content/controllers/razor pages itself
+        // and calls UseEndpoints internally (the endpoints callback overload was removed in the CMS 13
+        // upgrade). Calling app.UseEndpoints() a second time here would re-register every Foundation
+        // endpoint data source and throw "Duplicate endpoint name". Instead we reuse the endpoint route
+        // builder Foundation already created to add the product feed routes to the same data source.
+        _foundationStartup.Configure(app, env);
+
+        if (app.Properties.TryGetValue("__EndpointRouteBuilder", out var value)
+            && value is IEndpointRouteBuilder endpointRouteBuilder)
+        {
+            endpointRouteBuilder.MapProductFeeds();
+        }
     }
 }
