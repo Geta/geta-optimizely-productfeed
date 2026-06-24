@@ -67,5 +67,11 @@ public class Startup
         {
             endpointRouteBuilder.MapProductFeeds();
         }
+        else
+        {
+            throw new InvalidOperationException(
+                "Unable to find '__EndpointRouteBuilder' in ApplicationBuilder properties. " +
+                "Product feeds could not be mapped. Ensure UseRouting/UseEndpoints has run (Foundation.Configure) before this call.");
+        }
     }
 }

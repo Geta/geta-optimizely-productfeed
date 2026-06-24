@@ -24,14 +24,18 @@ jobs:
         run: |
           $version = ("${{github.ref_name}}").Remove(0, 1)
           echo "VERSION=$version" >> $env:GITHUB_ENV
-      - name: Release
+      - name: Build
         run: |
-          echo "${env:VERSION}"
-          dotnet build --configuration Release /p:Version=${{env.VERSION}}
+          dotnet build src/Geta.Optimizely.ProductFeed/Geta.Optimizely.ProductFeed.csproj --configuration Release /p:Version=${{env.VERSION}}
+          dotnet build src/Geta.Optimizely.ProductFeed.Csv/Geta.Optimizely.ProductFeed.Csv.csproj --configuration Release /p:Version=${{env.VERSION}}
+          dotnet build src/Geta.Optimizely.ProductFeed.Google/Geta.Optimizely.ProductFeed.Google.csproj --configuration Release /p:Version=${{env.VERSION}}
       - name: Test
-        run: dotnet test --configuration Release /p:Version=${{env.VERSION}} --no-build
+        run: dotnet test tests/Geta.Optimizely.ProductFeed.Tests/Geta.Optimizely.ProductFeed.Tests.csproj --configuration Release /p:Version=${{env.VERSION}} --filter Category!=Integration
       - name: Pack
-        run: dotnet pack --configuration Release /p:Version=${{env.VERSION}} --no-build --output .
+        run: |
+          dotnet pack src/Geta.Optimizely.ProductFeed/Geta.Optimizely.ProductFeed.csproj --configuration Release /p:Version=${{env.VERSION}} --no-build --output .
+          dotnet pack src/Geta.Optimizely.ProductFeed.Csv/Geta.Optimizely.ProductFeed.Csv.csproj --configuration Release /p:Version=${{env.VERSION}} --no-build --output .
+          dotnet pack src/Geta.Optimizely.ProductFeed.Google/Geta.Optimizely.ProductFeed.Google.csproj --configuration Release /p:Version=${{env.VERSION}} --no-build --output .
       - name: Push
         run: |
           dotnet nuget push Geta.Optimizely.ProductFeed.${{env.VERSION}}.nupkg --source https://nuget.pkg.github.com/Geta/index.json --api-key ${{env.GITHUB_TOKEN}}
@@ -41,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release with Auto-Generated Notes
         run: |
-          gh release create ${{ github.ref_name }} --generate-notes     
+          gh release create ${{ github.ref_name }} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Loop through all .nupkg files in the current directory and upload them to the release

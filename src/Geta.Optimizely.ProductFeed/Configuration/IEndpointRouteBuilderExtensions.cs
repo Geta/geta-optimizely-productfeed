@@ -42,13 +42,20 @@ public static class IEndpointRouteBuilderExtensions
         if (feed == null)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync("Feed not found");
+            await context.Response.WriteAsync("Feed not found", context.RequestAborted);
             return;
         }
 
         var descriptor = feedRepository.FindDescriptorByUri(siteUri);
 
+        if (descriptor == null)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsync("Feed descriptor not found", context.RequestAborted);
+            return;
+        }
+
         context.Response.ContentType = descriptor.MimeType;
-        await context.Response.Body.WriteAsync(feed.FeedBytes);
+        await context.Response.Body.WriteAsync(feed.FeedBytes, context.RequestAborted);
     }
 }

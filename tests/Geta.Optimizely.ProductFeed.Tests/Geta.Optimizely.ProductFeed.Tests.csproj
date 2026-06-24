@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.Commerce" Version="15.0.0" />
+    <PackageReference Include="EPiServer.Commerce.Core" Version="15.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\sub\geta-foundation-core\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
   </ItemGroup>
