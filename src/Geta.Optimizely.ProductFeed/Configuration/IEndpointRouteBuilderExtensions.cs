@@ -1,12 +1,7 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
-using System;
-using System.Threading.Tasks;
-using Geta.Optimizely.ProductFeed.Repositories;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,36 +21,9 @@ public static class IEndpointRouteBuilderExtensions
 
         foreach (var descriptor in descriptors)
         {
-            endpoints.MapGet(descriptor.FileName.TrimStart('/'), WriteFeedAsync);
+            endpoints.MapGet(descriptor.FileName.TrimStart('/'), ProductFeedEndpoint.WriteFeedAsync);
         }
 
         return endpoints;
-    }
-
-    private static async Task WriteFeedAsync(HttpContext context)
-    {
-        var feedRepository = context.RequestServices.GetRequiredService<IFeedRepository>();
-        var siteUri = new Uri(context.Request.GetEncodedUrl());
-
-        var feed = feedRepository.GetLatestFeed(siteUri);
-
-        if (feed == null)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync("Feed not found", context.RequestAborted);
-            return;
-        }
-
-        var descriptor = feedRepository.FindDescriptorByUri(siteUri);
-
-        if (descriptor == null)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync("Feed descriptor not found", context.RequestAborted);
-            return;
-        }
-
-        context.Response.ContentType = descriptor.MimeType;
-        await context.Response.Body.WriteAsync(feed.FeedBytes, context.RequestAborted);
     }
 }

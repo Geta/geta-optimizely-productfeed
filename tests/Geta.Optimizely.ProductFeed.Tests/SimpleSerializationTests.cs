@@ -64,7 +64,7 @@ public class SimpleSerializationTests
 // (keeps CI restore limited to the package's own dependencies).
 public class TestProduct : ProductContent
 {
-    public virtual string Brand { get; set; }
+    public virtual string Brand { get; set; } = string.Empty;
 }
 
 public class SiteUrlBuilderForUnitTests : ISiteUrlBuilder

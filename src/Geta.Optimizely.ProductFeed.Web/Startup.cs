@@ -62,7 +62,9 @@ public class Startup
         // builder Foundation already created to add the product feed routes to the same data source.
         _foundationStartup.Configure(app, env);
 
-        if (app.Properties.TryGetValue("__EndpointRouteBuilder", out var value)
+        const string EndpointRouteBuilderKey = "__EndpointRouteBuilder";
+
+        if (app.Properties.TryGetValue(EndpointRouteBuilderKey, out var value)
             && value is IEndpointRouteBuilder endpointRouteBuilder)
         {
             endpointRouteBuilder.MapProductFeeds();
@@ -70,7 +72,7 @@ public class Startup
         else
         {
             throw new InvalidOperationException(
-                "Unable to find '__EndpointRouteBuilder' in ApplicationBuilder properties. " +
+                $"Unable to find '{EndpointRouteBuilderKey}' in ApplicationBuilder properties. " +
                 "Product feeds could not be mapped. Ensure UseRouting/UseEndpoints has run (Foundation.Configure) before this call.");
         }
     }
