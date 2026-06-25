@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0]
+
+* Target .NET 10
+* Updated to Optimizely CMS 13 / Commerce 15 (`EPiServer.Commerce.Core` 15.0.0)
+* Updated Entity Framework Core to 10.0.5
+
 ## [4.0.1]
 * Fixed issue with CsvWriter initialization
 

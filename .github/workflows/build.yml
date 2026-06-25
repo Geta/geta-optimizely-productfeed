@@ -1,5 +1,6 @@
 name: Build
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -10,45 +11,23 @@ jobs:
     name: Build
     runs-on: windows-latest
     steps:
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
         with:
-          java-version: 1.11
-
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
           submodules: recursive
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          path: ~\sonar\cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          dotnet-version: '10.0.x'
 
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v1
-        with:
-          path: .\.sonar\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
+      # Build the packable projects and the test project only (not the Foundation
+      # submodule / Web / AppHost) so restore stays limited to the package's own
+      # dependencies. Building the test project also builds ProductFeed + Google.
+      - name: Build CSV
+        run: dotnet build src/Geta.Optimizely.ProductFeed.Csv/Geta.Optimizely.ProductFeed.Csv.csproj -c Release
 
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Build tests
+        run: dotnet build tests/Geta.Optimizely.ProductFeed.Tests/Geta.Optimizely.ProductFeed.Tests.csproj -c Release
 
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Geta_${{ github.event.repository.name }}" /o:"geta" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=**/**/coverage.opencover.xml
-          dotnet build
-          dotnet test --filter Category!=Integration /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage 
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      - name: Test
+        run: dotnet test tests/Geta.Optimizely.ProductFeed.Tests/Geta.Optimizely.ProductFeed.Tests.csproj -c Release --no-build --filter Category!=Integration
