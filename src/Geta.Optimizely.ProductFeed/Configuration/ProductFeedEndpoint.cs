@@ -18,21 +18,22 @@ internal static class ProductFeedEndpoint
     {
         var siteUri = new Uri(context.Request.GetEncodedUrl());
 
-        var feed = feedRepository.GetLatestFeed(siteUri);
-
-        if (feed == null)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync("Feed not found", context.RequestAborted);
-            return;
-        }
-
+        // Resolve the descriptor (in memory) before loading the feed, which can be tens of megabytes.
         var descriptor = feedRepository.FindDescriptorByUri(siteUri);
 
         if (descriptor == null)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
             await context.Response.WriteAsync("Feed descriptor not found", context.RequestAborted);
+            return;
+        }
+
+        var feed = feedRepository.GetLatestFeed(siteUri);
+
+        if (feed == null)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsync("Feed not found", context.RequestAborted);
             return;
         }
 

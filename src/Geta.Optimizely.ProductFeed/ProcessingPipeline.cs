@@ -10,6 +10,12 @@ using Geta.Optimizely.ProductFeed.Repositories;
 
 namespace Geta.Optimizely.ProductFeed;
 
+// Lets FeedBuilderCreateJob run the pipeline for the entity type chosen at startup without reflection.
+internal interface IProcessingPipeline
+{
+    void Process(JobStatusLogger logger, CancellationToken cancellationToken);
+}
+
 public class ProcessingPipeline<TEntity>(
     ISiteBuilder siteBuilder,
     IProductFeedContentLoader feedContentLoader,
@@ -18,7 +24,7 @@ public class ProcessingPipeline<TEntity>(
     IEnumerable<FeedDescriptor> feedDescriptors,
     Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> converterFactory,
     IFeedRepository feedRepository,
-    IProductFeedFilter<TEntity> filter = null)
+    IProductFeedFilter<TEntity> filter = null) : IProcessingPipeline
 {
     public void Process(JobStatusLogger logger, CancellationToken cancellationToken)
     {
@@ -29,57 +35,90 @@ public class ProcessingPipeline<TEntity>(
             .Select(converterFactory)
             .ToList();
 
-        var sourceData = feedContentLoader
-            .LoadSourceData(cancellationToken)
-            .Select(entityMapper.Map)
-            .Where(d => filter?.ShouldInclude(d) ?? true)
-            .Where(d => d != null)
-            .Select(d =>
+        try
+        {
+            logger.LogWithStatus("Loading catalog content...");
+
+            var sourceData = feedContentLoader
+                .LoadSourceData(cancellationToken)
+                .Select(content =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return entityMapper.Map(content);
+                })
+                .Where(d => d != null)
+                .Where(d => filter?.ShouldInclude(d) ?? true)
+                .ToList();
+
+            logger.LogWithStatus($"Loaded {sourceData.Count} entities.");
+
+            for (var i = 0; i < sourceData.Count; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (var enricher in enrichers)
                 {
-                    enricher.Enrich(d, cancellationToken);
+                    // An enricher may return a new instance (e.g. a record updated with 'with'); null keeps the current one.
+                    sourceData[i] = enricher.Enrich(sourceData[i], cancellationToken) ?? sourceData[i];
                 }
 
-                return d;
-            })
-            .ToList();
-
-        foreach (var host in siteBuilder.GetHosts())
-        {
-            // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
-            // render document start tag or do some other magic
-            foreach (var exporter in exporters)
-            {
-                exporter.BeginExport(host, cancellationToken);
+                logger.Progress("Enriching entities", i + 1, sourceData.Count);
             }
 
-            foreach (var d in sourceData)
+            foreach (var host in siteBuilder.GetHosts())
             {
+                var hostUrl = host.Url;
+                var buildActivity = $"Building feeds for {hostUrl}";
+
+                // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
+                // render document start tag or do some other magic
                 foreach (var exporter in exporters)
                 {
-                    exporter.BuildEntry(d, host, cancellationToken);
+                    exporter.BeginExport(host, cancellationToken);
+                }
+
+                for (var i = 0; i < sourceData.Count; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    foreach (var exporter in exporters)
+                    {
+                        exporter.BuildEntry(sourceData[i], host, cancellationToken);
+                    }
+
+                    logger.Progress(buildActivity, i + 1, sourceData.Count);
+                }
+
+                // Don't replace stored feeds with ones a Stop cut short, e.g. when a loader ends early once cancelled
+                // and there were no entities to check the token for.
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // dispose exporters - so we let them flush and wrap-up
+                foreach (var exporter in exporters)
+                {
+                    feedRepository.Save(exporter.FinishExport(host, cancellationToken));
+                }
+
+                logger.LogWithStatus($"> Generated feeds for {hostUrl} host.");
+            }
+
+            logger.LogWithStatus("Product feed generation completed.");
+        }
+        finally
+        {
+            // let it go! let it go!
+            // A failing Dispose must not hide the stop or error that ended the export, or skip the other exporters.
+            foreach (var disposable in exporters.OfType<IDisposable>())
+            {
+                try
+                {
+                    disposable.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.Log($"Failed to dispose exporter {disposable.GetType().FullName}. {ex}");
                 }
             }
-
-            // dispose exporters - so we let them flush and wrap-up
-            foreach (var exporter in exporters)
-            {
-                feedRepository.Save(exporter.FinishExport(host, cancellationToken));
-            }
-
-            logger.LogWithStatus($"> Generated feeds for {host.Url} host.");
         }
-
-        // let it go! let it go!
-        foreach (var exporter in exporters)
-        {
-            if (exporter is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
-
-        logger.LogWithStatus("Product feed generation completed.");
     }
 }

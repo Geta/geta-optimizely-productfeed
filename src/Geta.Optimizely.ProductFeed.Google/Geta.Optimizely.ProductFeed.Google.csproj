@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Version>5.0.0</Version>
-    <PackageVersion>5.0.0</PackageVersion>
+    <Version>5.1.0</Version>
+    <PackageVersion>5.1.0</PackageVersion>
     <PackageId>Geta.Optimizely.ProductFeed.Google</PackageId>
     <Title>Geta Optimizely Google Product Feed ProductFeed</Title>
     <IsPackable>true</IsPackable>

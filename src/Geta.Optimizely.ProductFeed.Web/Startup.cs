@@ -1,4 +1,7 @@
+using System.Reflection;
 using EPiServer.Web.Routing;
+using Geta.Optimizely.ProductFeed.Web.Services;
+using Optimizely.Graph.Cms.Configuration;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Csv;
 using Geta.Optimizely.ProductFeed.Google;
@@ -7,6 +10,7 @@ using Geta.Optimizely.ProductFeed.Web.Enrichers;
 using Geta.Optimizely.ProductFeed.Web.Exporters;
 using Geta.Optimizely.ProductFeed.Web.Mappers;
 using Geta.Optimizely.ProductFeed.Web.Models;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Geta.Optimizely.ProductFeed.Web;
 
@@ -24,6 +28,8 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         _foundationStartup.ConfigureServices(services);
+        UseNoOpGraphSyncClientWhenUnconfigured(services);
+
         services
             .AddProductFeed<MyCommerceProductRecord>(options =>
             {
@@ -51,6 +57,34 @@ public class Startup
                     d.CsvEntityType = typeof(CsvEntry);
                 });
             });
+    }
+
+    // When no ContentGraph AppKey is configured (the sandbox default), turn off Graph indexing and log sending,
+    // which would otherwise call Graph with empty credentials, and replace the Graph sync client with a no-op so
+    // startup doesn't fail on Graph schema initialization (it checks the schema regardless of IndexingEnabled).
+    // Done in code rather than appsettings.json so real keys in appsettings.{Environment}.json still enable Graph.
+    private void UseNoOpGraphSyncClientWhenUnconfigured(IServiceCollection services)
+    {
+        if (!string.IsNullOrEmpty(_configuration["Optimizely:ContentGraph:AppKey"]))
+        {
+            return;
+        }
+
+        services.PostConfigure<GraphCmsOptions>(options =>
+        {
+            options.IndexingEnabled = false;
+            options.EventIndexingEnabled = false;
+        });
+        services.PostConfigure<GraphLoggingOptions>(options => options.AllowSendingLogs = false);
+
+        // ISyncClient is internal to Optimizely.Graph.Cms, so it can only be found by name.
+        var syncClientType = typeof(GraphCmsOptions).Assembly.GetType("Optimizely.Graph.Cms.Client.ISyncClient");
+        if (syncClientType == null)
+        {
+            return;
+        }
+
+        services.Replace(ServiceDescriptor.Singleton(syncClientType, DispatchProxy.Create(syncClientType, typeof(NoOpSyncClientProxy))));
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -17,18 +17,18 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 {
     public FeedEntity GetLatestFeed(Uri siteUri)
     {
-        if (siteUri == null)
-        {
-            throw new ArgumentNullException(nameof(siteUri));
-        }
+        ArgumentNullException.ThrowIfNull(siteUri);
 
-        // we need to do client-side eval because string.Equals with comparison is not supported
-        var feedContent = applicationDbContext
-            .FeedData
-            .ToList();
+        var link = FeedLink.Normalize(siteUri);
 
-        return feedContent.FirstOrDefault(f => f.Link.Equals(GetAbsoluteUrlWithoutQuery(siteUri).AbsoluteUri.TrimEnd('/'),
-                                                             StringComparison.InvariantCultureIgnoreCase));
+        // Links are stored normalized, so one query usually finds the feed. Rows saved by earlier versions keep
+        // their original link until the job regenerates them, so fall back to matching links client-side.
+        return applicationDbContext.FeedData
+                   .AsNoTracking()
+                   .Where(f => f.Link == link)
+                   .OrderByDescending(f => f.CreatedUtc)
+                   .FirstOrDefault()
+               ?? FindFeed(FindFeedId(link));
     }
 
     public void Save(ICollection<FeedEntity> feedData)
@@ -38,12 +38,13 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
             return;
         }
 
-        var feeds = applicationDbContext.FeedData.ToList();
-
         foreach (var data in feedData)
         {
-            PrepareFeedData(feeds, data);
+            var link = FeedLink.NormalizeStored(data.Link);
+            Upsert(FindFeedId(link), link, data);
+
             applicationDbContext.SaveChanges();
+            applicationDbContext.ChangeTracker.Clear();
         }
     }
 
@@ -54,39 +55,76 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
             return;
         }
 
-        var feeds = await applicationDbContext.FeedData.ToListAsync(cancellationToken);
         foreach (var data in feedData)
         {
-            PrepareFeedData(feeds, data);
+            var link = FeedLink.NormalizeStored(data.Link);
+            Upsert(await FindFeedIdAsync(link, cancellationToken), link, data);
+
             await applicationDbContext.SaveChangesAsync(cancellationToken);
+            applicationDbContext.ChangeTracker.Clear();
         }
     }
 
     public FeedDescriptor FindDescriptorByUri(Uri siteUri)
     {
-        var path = GetAbsoluteUrlWithoutQuery(siteUri).AbsolutePath.Trim('/');
+        ArgumentNullException.ThrowIfNull(siteUri);
+
+        // AbsolutePath is percent-encoded ("produktfl%C3%B6de"), descriptor file names are not ("produktflöde").
+        var path = Uri.UnescapeDataString(siteUri.AbsolutePath).Trim('/');
 
         return descriptors.FirstOrDefault(d => d.FileName.Trim('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private void PrepareFeedData(List<FeedEntity> feeds, FeedEntity data)
+    // Only Id and Link are loaded: links are matched client-side (IDN host normalization), and loading
+    // FeedBytes for every stored feed would pull the content of all feeds into memory on each lookup.
+    private IQueryable<FeedLinkRow> QueryFeedLinks()
     {
-        var found = feeds.FirstOrDefault(f => f.Link.Equals(data.Link, StringComparison.InvariantCultureIgnoreCase));
+        return applicationDbContext.FeedData
+            .AsNoTracking()
+            .OrderByDescending(f => f.CreatedUtc)
+            .Select(f => new FeedLinkRow(f.Id, f.Link));
+    }
 
-        if (found != null)
+    private int? FindFeedId(string normalizedLink)
+    {
+        return MatchFeedId(QueryFeedLinks().ToList(), normalizedLink);
+    }
+
+    private async Task<int?> FindFeedIdAsync(string normalizedLink, CancellationToken cancellationToken)
+    {
+        return MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), normalizedLink);
+    }
+
+    private static int? MatchFeedId(IEnumerable<FeedLinkRow> feeds, string normalizedLink)
+    {
+        return feeds.FirstOrDefault(f => FeedLink.AreEqual(f.Link, normalizedLink))?.Id;
+    }
+
+    private FeedEntity FindFeed(int? id)
+    {
+        return id == null ? null : applicationDbContext.FeedData.AsNoTracking().FirstOrDefault(f => f.Id == id);
+    }
+
+    private void Upsert(int? existingId, string normalizedLink, FeedEntity data)
+    {
+        if (existingId is int id)
         {
-            found.CreatedUtc = DateTime.UtcNow;
-            found.FeedBytes = data.FeedBytes;
+            // Update through a key-only entity instead of loading the existing row, whose FeedBytes can be
+            // tens of megabytes. Marking the columns modified also writes a null FeedBytes, and rewrites
+            // links stored by earlier versions in their normalized form.
+            var existing = new FeedEntity { Id = id, CreatedUtc = DateTime.UtcNow, FeedBytes = data.FeedBytes, Link = normalizedLink };
+            var entry = applicationDbContext.FeedData.Attach(existing);
+            entry.Property(f => f.CreatedUtc).IsModified = true;
+            entry.Property(f => f.FeedBytes).IsModified = true;
+            entry.Property(f => f.Link).IsModified = true;
         }
         else
         {
             data.CreatedUtc = DateTime.UtcNow;
+            data.Link = normalizedLink;
             applicationDbContext.FeedData.Add(data);
         }
     }
 
-    private Uri GetAbsoluteUrlWithoutQuery(Uri siteUri)
-    {
-        return new UriBuilder(siteUri) { Query = string.Empty }.Uri;
-    }
+    private sealed record FeedLinkRow(int Id, string Link);
 }

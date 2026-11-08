@@ -37,16 +37,16 @@ public class FeedBuilderCreateJob : ScheduledJobBase
             // this is required as we have no idea until the very last minute (runtime) what entity type consuming project will choose
             // so to make it easier for the ProductFeed library - whole processing pipeline is generalized with type parameter
             // but from the point of view of the scheduled job - we have no info about generic type we should use here
-            // thus - "dynamic" invoke
+            // thus - resolve the closed pipeline type at runtime and call it through its non-generic interface
             var mappedType = _options.MappedEntity;
             var genericPipelineType = typeof(ProcessingPipeline<>).MakeGenericType(mappedType);
-            var genericPipeline = _serviceFactory(genericPipelineType);
-            var mi = genericPipelineType.GetMethod(nameof(ProcessingPipeline<object>.Process));
+            var pipeline = (IProcessingPipeline)_serviceFactory(genericPipelineType);
 
-            if (mi != null)
-            {
-                mi.Invoke(genericPipeline, [_jobStatusLogger, _cts.Token]);
-            }
+            pipeline.Process(_jobStatusLogger, _cts.Token);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
+            _jobStatusLogger.LogWithStatus("Job was stopped before feed generation completed.");
         }
         catch (Exception ex)
         {
@@ -60,7 +60,7 @@ public class FeedBuilderCreateJob : ScheduledJobBase
 
     public override void Stop()
     {
+        // Not disposed: Execute may still read the token, and the scheduler can call Stop more than once.
         _cts.Cancel();
-        _cts.Dispose();
     }
 }

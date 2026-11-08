@@ -2,7 +2,6 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
-using System.Text;
 using Geta.Optimizely.ProductFeed.Repositories;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +14,13 @@ public class ProductFeedController(IFeedRepository feedRepository) : ControllerB
     {
         var host = HttpContext.Request.GetEncodedUrl();
         var siteHost = new Uri(host);
+        var descriptor = feedRepository.FindDescriptorByUri(siteHost);
+
+        if (descriptor == null)
+        {
+            return NotFound("Feed descriptor not found");
+        }
+
         var feedInfo = feedRepository.GetLatestFeed(siteHost);
 
         if (feedInfo == null)
@@ -22,8 +28,6 @@ public class ProductFeedController(IFeedRepository feedRepository) : ControllerB
             return NotFound("Feed not found");
         }
 
-        var descriptor = feedRepository.FindDescriptorByUri(siteHost);
-
-        return Content(Encoding.UTF8.GetString(feedInfo.FeedBytes), descriptor.MimeType);
+        return File(feedInfo.FeedBytes, descriptor.MimeType);
     }
 }
