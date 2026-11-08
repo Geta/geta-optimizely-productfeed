@@ -119,8 +119,8 @@ public class ProcessingPipelineTests
 
         return new ProcessingPipeline<TestEntity>(
             new FixedSiteBuilder(hosts ?? [new HostDefinition { Name = "example.com" }]),
-            new FixedContentLoader(codes.Length),
-            mapper ?? new IndexMapper(codes),
+            new FixedContentLoader(codes),
+            mapper ?? new CodeMapper(),
             [enricher ?? new NoOpEnricher()],
             [descriptor],
             _ => exporter ?? _exporter,
@@ -138,20 +138,17 @@ public class ProcessingPipelineTests
         public IEnumerable<HostDefinition> GetHosts() => hosts;
     }
 
-    private class FixedContentLoader(int count) : IProductFeedContentLoader
+    private class FixedContentLoader(string[] codes) : IProductFeedContentLoader
     {
         public IEnumerable<CatalogContentBase> LoadSourceData(CancellationToken cancellationToken) =>
-            Enumerable.Range(0, count).Select(i => new TestProduct { Code = i.ToString() });
+            codes.Select(code => new TestProduct { Code = code });
     }
 
-    // Maps the n-th loaded item to codes[n]; a null code maps to a null entity.
-    private class IndexMapper(string[] codes) : IEntityMapper<TestEntity>
+    // A null code maps to a null entity.
+    private class CodeMapper : IEntityMapper<TestEntity>
     {
-        public TestEntity Map(CatalogContentBase catalogContent)
-        {
-            var code = codes[int.Parse(((TestProduct)catalogContent).Code)];
-            return code == null ? null : new TestEntity { Code = code };
-        }
+        public TestEntity Map(CatalogContentBase catalogContent) =>
+            ((TestProduct)catalogContent).Code is { } code ? new TestEntity { Code = code } : null;
     }
 
     // Cancels the job's token while mapping the n-th item, like a Stop clicked during "Loading catalog content...".

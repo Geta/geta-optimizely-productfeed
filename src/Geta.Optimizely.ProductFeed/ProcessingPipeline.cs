@@ -107,19 +107,16 @@ public class ProcessingPipeline<TEntity>(
         finally
         {
             // let it go! let it go!
-            foreach (var exporter in exporters)
+            // A failing Dispose must not hide the stop or error that ended the export, or skip the other exporters.
+            foreach (var disposable in exporters.OfType<IDisposable>())
             {
-                if (exporter is IDisposable disposable)
+                try
                 {
-                    // A failing Dispose must not hide the stop or error that ended the export, or skip the other exporters.
-                    try
-                    {
-                        disposable.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Log($"Failed to dispose exporter {exporter.GetType().FullName}. {ex}");
-                    }
+                    disposable.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.Log($"Failed to dispose exporter {disposable.GetType().FullName}. {ex}");
                 }
             }
         }

@@ -71,7 +71,23 @@ public class FeedRepositoryTests
 
         var stored = Assert.Single(_dbContext.FeedData.AsNoTracking().ToList());
         Assert.Equal("v2", Encoding.UTF8.GetString(stored.FeedBytes));
-        Assert.Equal("https://bücher.de/google-feed", stored.Link);
+        Assert.Equal("https://xn--bcher-kva.de/google-feed", stored.Link);
+    }
+
+    [Fact]
+    public void LinkStoredByEarlierVersion_IsFoundAndNormalizedOnNextSave()
+    {
+        _dbContext.FeedData.Add(Feed("https://bücher.de/google-feed/", "legacy"));
+        _dbContext.SaveChanges();
+        _dbContext.ChangeTracker.Clear();
+
+        var legacy = _repository.GetLatestFeed(new Uri("https://xn--bcher-kva.de/google-feed"));
+        _repository.Save([Feed("https://bücher.de/google-feed", "regenerated")]);
+
+        Assert.Equal("legacy", Encoding.UTF8.GetString(legacy!.FeedBytes));
+        var stored = Assert.Single(_dbContext.FeedData.AsNoTracking().ToList());
+        Assert.Equal("https://xn--bcher-kva.de/google-feed", stored.Link);
+        Assert.Equal("regenerated", Encoding.UTF8.GetString(stored.FeedBytes));
     }
 
     [Fact]

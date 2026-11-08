@@ -9,8 +9,7 @@ internal class NoOpSyncClientProxy : DispatchProxy
 {
     private static readonly MethodInfo FromResultMethod = typeof(Task).GetMethod(nameof(Task.FromResult))!;
 
-    private static readonly MethodInfo EmptyAsyncMethod =
-        typeof(NoOpSyncClientProxy).GetMethod(nameof(EmptyAsync), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly MethodInfo EmptyAsyncMethod = typeof(AsyncEnumerable).GetMethod(nameof(AsyncEnumerable.Empty))!;
 
     protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
     {
@@ -51,11 +50,4 @@ internal class NoOpSyncClientProxy : DispatchProxy
         // Value types get their default; classes with a parameterless constructor (Graph's response types) an empty instance.
         return type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null ? Activator.CreateInstance(type) : null;
     }
-
-#pragma warning disable CS1998 // An empty async stream has nothing to await.
-    private static async IAsyncEnumerable<T> EmptyAsync<T>()
-    {
-        yield break;
-    }
-#pragma warning restore CS1998
 }

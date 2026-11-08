@@ -97,6 +97,21 @@ public class CsvFeedExporterTests
         return exporter;
     }
 
+    [Fact]
+    public void EnumerableRecordOfDeclaredType_WritesOneRow()
+    {
+        var csv = Export(new TaggedRow { Code = "A", Name = "Shirt" });
+
+        Assert.Equal(["Code,Name", "A,Shirt"], csv);
+    }
+
+    public class TaggedRow : CsvRow, IEnumerable<string>
+    {
+        public IEnumerator<string> GetEnumerator() => new List<string> { "tag" }.GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
     public class CsvRow
     {
         public string Code { get; set; } = string.Empty;

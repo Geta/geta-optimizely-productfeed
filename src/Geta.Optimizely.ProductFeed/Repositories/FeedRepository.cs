@@ -19,9 +19,16 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
     {
         ArgumentNullException.ThrowIfNull(siteUri);
 
-        var id = MatchFeedId(QueryFeedLinks().ToList(), FeedLink.Normalize(siteUri));
+        var link = FeedLink.Normalize(siteUri);
 
-        return id == null ? null : applicationDbContext.FeedData.AsNoTracking().FirstOrDefault(f => f.Id == id);
+        // Links are stored normalized, so one query usually finds the feed. Rows saved by earlier versions keep
+        // their original link until the job regenerates them, so fall back to matching links client-side.
+        return applicationDbContext.FeedData
+                   .AsNoTracking()
+                   .Where(f => f.Link == link)
+                   .OrderByDescending(f => f.CreatedUtc)
+                   .FirstOrDefault()
+               ?? FindFeed(FindFeedId(link));
     }
 
     public void Save(ICollection<FeedEntity> feedData)
@@ -33,7 +40,8 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 
         foreach (var data in feedData)
         {
-            Upsert(MatchFeedId(QueryFeedLinks().ToList(), FeedLink.NormalizeStored(data.Link)), data);
+            var link = FeedLink.NormalizeStored(data.Link);
+            Upsert(FindFeedId(link), link, data);
 
             applicationDbContext.SaveChanges();
             applicationDbContext.ChangeTracker.Clear();
@@ -49,7 +57,8 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 
         foreach (var data in feedData)
         {
-            Upsert(MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), FeedLink.NormalizeStored(data.Link)), data);
+            var link = FeedLink.NormalizeStored(data.Link);
+            Upsert(await FindFeedIdAsync(link, cancellationToken), link, data);
 
             await applicationDbContext.SaveChangesAsync(cancellationToken);
             applicationDbContext.ChangeTracker.Clear();
@@ -76,25 +85,43 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
             .Select(f => new FeedLinkRow(f.Id, f.Link));
     }
 
+    private int? FindFeedId(string normalizedLink)
+    {
+        return MatchFeedId(QueryFeedLinks().ToList(), normalizedLink);
+    }
+
+    private async Task<int?> FindFeedIdAsync(string normalizedLink, CancellationToken cancellationToken)
+    {
+        return MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), normalizedLink);
+    }
+
     private static int? MatchFeedId(IEnumerable<FeedLinkRow> feeds, string normalizedLink)
     {
         return feeds.FirstOrDefault(f => FeedLink.AreEqual(f.Link, normalizedLink))?.Id;
     }
 
-    private void Upsert(int? existingId, FeedEntity data)
+    private FeedEntity FindFeed(int? id)
+    {
+        return id == null ? null : applicationDbContext.FeedData.AsNoTracking().FirstOrDefault(f => f.Id == id);
+    }
+
+    private void Upsert(int? existingId, string normalizedLink, FeedEntity data)
     {
         if (existingId is int id)
         {
             // Update through a key-only entity instead of loading the existing row, whose FeedBytes can be
-            // tens of megabytes. Marking both columns modified also writes a null FeedBytes.
-            var existing = new FeedEntity { Id = id, CreatedUtc = DateTime.UtcNow, FeedBytes = data.FeedBytes };
+            // tens of megabytes. Marking the columns modified also writes a null FeedBytes, and rewrites
+            // links stored by earlier versions in their normalized form.
+            var existing = new FeedEntity { Id = id, CreatedUtc = DateTime.UtcNow, FeedBytes = data.FeedBytes, Link = normalizedLink };
             var entry = applicationDbContext.FeedData.Attach(existing);
             entry.Property(f => f.CreatedUtc).IsModified = true;
             entry.Property(f => f.FeedBytes).IsModified = true;
+            entry.Property(f => f.Link).IsModified = true;
         }
         else
         {
             data.CreatedUtc = DateTime.UtcNow;
+            data.Link = normalizedLink;
             applicationDbContext.FeedData.Add(data);
         }
     }

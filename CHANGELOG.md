@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 * CSV export can write several rows for one entity: return a collection of CSV records from the converter (#20)
 * Fixed feeds not being found for internationalized domain names, e.g. `bücher.de` (#14)
+* Feed links are now stored with the IDN-encoded host; existing rows are still found and are rewritten the next time the job runs
 * The `ProductFeed - Create feeds` job now reports progress in its status while enriching entities and building feeds (#11)
 * Stopping the job now takes effect between entities, also while catalog content is loaded, and is logged as a stop instead of an error
 * Serving a feed no longer loads the content of every stored feed into memory, and saving a feed no longer reads the previous version first (#13)

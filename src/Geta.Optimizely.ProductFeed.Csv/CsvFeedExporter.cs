@@ -32,10 +32,7 @@ public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : A
 
     public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
     {
-        // A converter may return a collection (e.g. IEnumerable<CsvEntry>) to write several rows for one entity.
-        // Non-generic IEnumerable avoids generic invariance issues. Dynamic objects (ExpandoObject) and dictionaries
-        // are enumerable too, but CsvHelper writes each of them as a single record.
-        if (value is IEnumerable records and not string and not IDynamicMetaObjectProvider and not IDictionary<string, object>)
+        if (IsRecordCollection(value, out var records))
         {
             foreach (var record in records)
             {
@@ -49,6 +46,17 @@ public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : A
         }
 
         return [];
+    }
+
+    // A converter may return a collection (e.g. IEnumerable<CsvEntry>) to write several rows for one entity.
+    // A value of the declared CsvEntityType is one row even if it is enumerable, and so are dynamic objects
+    // (ExpandoObject) and dictionaries, which CsvHelper writes as a single record.
+    private bool IsRecordCollection(object value, out IEnumerable records)
+    {
+        records = value as IEnumerable;
+
+        return records is not null and not string and not IDynamicMetaObjectProvider and not IDictionary<string, object>
+               && !descriptor.CsvEntityType.IsInstanceOfType(value);
     }
 
     private void WriteRecord(object record)
