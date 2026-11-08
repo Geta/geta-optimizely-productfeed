@@ -1,8 +1,9 @@
 // Copyright (c) Geta Digital. All rights reserved.
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
+using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Globalization;
 using Xunit;
 
 namespace Geta.Optimizely.ProductFeed.Tests;
@@ -46,10 +47,27 @@ public class JobStatusLoggerTests
     }
 
     [Fact]
-    public void LogWithStatus_Uses24HourTimestamp()
+    public void LogWithStatus_UsesInvariant24HourTimestamp()
     {
-        new JobStatusLogger(_statuses.Add).LogWithStatus("done");
+        var logger = new JobStatusLogger(_statuses.Add, new FixedTimeProvider(new DateTimeOffset(2026, 11, 7, 14, 30, 5, TimeSpan.Zero)));
+        var culture = CultureInfo.CurrentCulture;
 
-        Assert.Matches(new Regex(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} - done$"), _statuses[0]);
+        try
+        {
+            // fi-FI formats times with '.' as the separator
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fi-FI");
+            logger.LogWithStatus("done");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = culture;
+        }
+
+        Assert.Equal("2026-11-07 14:30:05 - done", _statuses[0]);
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => utcNow;
     }
 }

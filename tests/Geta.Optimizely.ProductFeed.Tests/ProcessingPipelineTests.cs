@@ -62,20 +62,68 @@ public class ProcessingPipelineTests
         Assert.True(_exporter.Disposed);
     }
 
+    [Fact]
+    public void Process_WhenStoppedWhileLoading_StopsMapping()
+    {
+        using var cts = new CancellationTokenSource();
+        var mapper = new CancellingMapper(cts, cancelOnCall: 2);
+        var pipeline = CreatePipeline(codes: ["1", "2", "3", "4"], mapper: mapper);
+
+        Assert.Throws<OperationCanceledException>(() => pipeline.Process(new JobStatusLogger(_statuses.Add), cts.Token));
+        Assert.Equal(2, mapper.Calls);
+        Assert.Empty(_repository.Saved);
+    }
+
+    [Fact]
+    public void Process_WhenStoppedWithNothingLoaded_KeepsStoredFeeds()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        var pipeline = CreatePipeline(codes: []);
+
+        Assert.Throws<OperationCanceledException>(() => pipeline.Process(new JobStatusLogger(_statuses.Add), cts.Token));
+        Assert.Empty(_repository.Saved);
+    }
+
+    [Fact]
+    public void Process_WhenDisposeFails_KeepsTheExceptionThatEndedTheExport()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        var logger = new JobStatusLogger(_statuses.Add);
+        var pipeline = CreatePipeline(codes: ["1"], exporter: new ThrowingDisposeExporter());
+
+        Assert.Throws<OperationCanceledException>(() => pipeline.Process(logger, cts.Token));
+        Assert.Contains("Failed to dispose exporter", logger.ToString());
+    }
+
+    [Fact]
+    public void Process_ExportsEntitiesReturnedByEnrichers()
+    {
+        var pipeline = CreatePipeline(codes: ["1", "2"], enricher: new ReplacingEnricher());
+
+        pipeline.Process(new JobStatusLogger(_statuses.Add), CancellationToken.None);
+
+        Assert.Equal(["1 enriched", "2 enriched"], _exporter.Built);
+    }
+
     private ProcessingPipeline<TestEntity> CreatePipeline(
         string[] codes,
-        IProductFeedFilter<TestEntity> filter = null,
-        HostDefinition[] hosts = null)
+        IProductFeedFilter<TestEntity>? filter = null,
+        HostDefinition[]? hosts = null,
+        IEntityMapper<TestEntity>? mapper = null,
+        IProductFeedContentEnricher<TestEntity>? enricher = null,
+        AbstractFeedContentExporter<TestEntity>? exporter = null)
     {
         var descriptor = new FeedDescriptor("test", "/feed", "text/plain");
 
         return new ProcessingPipeline<TestEntity>(
             new FixedSiteBuilder(hosts ?? [new HostDefinition { Name = "example.com" }]),
             new FixedContentLoader(codes.Length),
-            new IndexMapper(codes),
-            [new NoOpEnricher()],
+            mapper ?? new IndexMapper(codes),
+            [enricher ?? new NoOpEnricher()],
             [descriptor],
-            _ => _exporter,
+            _ => exporter ?? _exporter,
             _repository,
             filter);
     }
@@ -106,6 +154,22 @@ public class ProcessingPipelineTests
         }
     }
 
+    // Cancels the job's token while mapping the n-th item, like a Stop clicked during "Loading catalog content...".
+    private class CancellingMapper(CancellationTokenSource cts, int cancelOnCall) : IEntityMapper<TestEntity>
+    {
+        public int Calls { get; private set; }
+
+        public TestEntity Map(CatalogContentBase catalogContent)
+        {
+            if (++Calls == cancelOnCall)
+            {
+                cts.Cancel();
+            }
+
+            return new TestEntity { Code = ((TestProduct)catalogContent).Code };
+        }
+    }
+
     private class CodeFilter(Func<string, bool> include) : IProductFeedFilter<TestEntity>
     {
         public bool ShouldInclude(TestEntity entity) => include(entity.Code);
@@ -114,6 +178,13 @@ public class ProcessingPipelineTests
     private class NoOpEnricher : IProductFeedContentEnricher<TestEntity>
     {
         public TestEntity Enrich(TestEntity sourceData, CancellationToken cancellationToken) => sourceData;
+    }
+
+    // Returns a new instance instead of changing the one it is given.
+    private class ReplacingEnricher : IProductFeedContentEnricher<TestEntity>
+    {
+        public TestEntity Enrich(TestEntity sourceData, CancellationToken cancellationToken) =>
+            new() { Code = $"{sourceData.Code} enriched" };
     }
 
     private class RecordingExporter : AbstractFeedContentExporter<TestEntity>, IDisposable
@@ -133,6 +204,11 @@ public class ProcessingPipelineTests
         public override object ConvertEntry(TestEntity entity, HostDefinition host, CancellationToken cancellationToken) => entity;
 
         public void Dispose() => Disposed = true;
+    }
+
+    private class ThrowingDisposeExporter : RecordingExporter, IDisposable
+    {
+        void IDisposable.Dispose() => throw new InvalidOperationException("Dispose failed");
     }
 
     private class RecordingRepository : IFeedRepository

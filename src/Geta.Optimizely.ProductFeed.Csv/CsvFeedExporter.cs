@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -32,8 +33,9 @@ public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : A
     public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
     {
         // A converter may return a collection (e.g. IEnumerable<CsvEntry>) to write several rows for one entity.
-        // Non-generic IEnumerable avoids generic invariance issues.
-        if (value is IEnumerable records and not string)
+        // Non-generic IEnumerable avoids generic invariance issues. Dynamic objects (ExpandoObject) and dictionaries
+        // are enumerable too, but CsvHelper writes each of them as a single record.
+        if (value is IEnumerable records and not string and not IDynamicMetaObjectProvider and not IDictionary<string, object>)
         {
             foreach (var record in records)
             {

@@ -33,8 +33,7 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 
         foreach (var data in feedData)
         {
-            var id = MatchFeedId(QueryFeedLinks().ToList(), FeedLink.Normalize(data.Link));
-            Upsert(id == null ? null : applicationDbContext.FeedData.Find(id), data);
+            Upsert(MatchFeedId(QueryFeedLinks().ToList(), FeedLink.NormalizeStored(data.Link)), data);
 
             applicationDbContext.SaveChanges();
             applicationDbContext.ChangeTracker.Clear();
@@ -50,8 +49,7 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 
         foreach (var data in feedData)
         {
-            var id = MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), FeedLink.Normalize(data.Link));
-            Upsert(id == null ? null : await applicationDbContext.FeedData.FindAsync([id], cancellationToken), data);
+            Upsert(MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), FeedLink.NormalizeStored(data.Link)), data);
 
             await applicationDbContext.SaveChangesAsync(cancellationToken);
             applicationDbContext.ChangeTracker.Clear();
@@ -60,7 +58,10 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 
     public FeedDescriptor FindDescriptorByUri(Uri siteUri)
     {
-        var path = siteUri.AbsolutePath.Trim('/');
+        ArgumentNullException.ThrowIfNull(siteUri);
+
+        // AbsolutePath is percent-encoded ("produktfl%C3%B6de"), descriptor file names are not ("produktflöde").
+        var path = Uri.UnescapeDataString(siteUri.AbsolutePath).Trim('/');
 
         return descriptors.FirstOrDefault(d => d.FileName.Trim('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
     }
@@ -80,12 +81,16 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
         return feeds.FirstOrDefault(f => FeedLink.AreEqual(f.Link, normalizedLink))?.Id;
     }
 
-    private void Upsert(FeedEntity existing, FeedEntity data)
+    private void Upsert(int? existingId, FeedEntity data)
     {
-        if (existing != null)
+        if (existingId is int id)
         {
-            existing.CreatedUtc = DateTime.UtcNow;
-            existing.FeedBytes = data.FeedBytes;
+            // Update through a key-only entity instead of loading the existing row, whose FeedBytes can be
+            // tens of megabytes. Marking both columns modified also writes a null FeedBytes.
+            var existing = new FeedEntity { Id = id, CreatedUtc = DateTime.UtcNow, FeedBytes = data.FeedBytes };
+            var entry = applicationDbContext.FeedData.Attach(existing);
+            entry.Property(f => f.CreatedUtc).IsModified = true;
+            entry.Property(f => f.FeedBytes).IsModified = true;
         }
         else
         {

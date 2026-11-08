@@ -37,6 +37,22 @@ services
 
 Here `MyCommerceProductRecord` is an entity to which a generic `CatalogContentBase` objects will be mapped to.
 
+Large feeds can take longer to save than the default 30 second SQL command timeout. Increase it with `CommandTimeout`, either in code or in `appsettings.json`:
+
+```csharp
+x.CommandTimeout = TimeSpan.FromMinutes(5);
+```
+
+```json
+{
+  "Geta": {
+    "ProductFeed": {
+      "CommandTimeout": "00:05:00"
+    }
+  }
+}
+```
+
 Then you need to add mapping to serve feeds from configured URLs:
 
 ```csharp
@@ -212,7 +228,7 @@ All processing pipeline logic is the same as for the Google Xml feed except foll
 
 Custom CSV entity (`CsvEntity.cs`):
 
-```csahrp
+```csharp
 public class CsvEntry
 {
     public string Name { get; set; }
@@ -239,13 +255,36 @@ public class CsvConverter : IProductFeedConverter<MyCommerceProductRecord>
 
 CSV feed will have a header row generated out-of-the-box based on properties in `CsvEntity` class.
 
+To write several CSV rows for one entity (for example one row per image or variant), return a collection of CSV records from the converter. Each item is written as its own row. This example assumes you have added an `ImageLinks` collection to `MyCommerceProductRecord` and an `ImageLink` column to `CsvEntry`:
+
+```csharp
+public class CsvConverter : IProductFeedConverter<MyCommerceProductRecord>
+{
+    public object Convert(MyCommerceProductRecord entity, HostDefinition host)
+    {
+        return entity.ImageLinks.Select(image => new CsvEntry
+        {
+            Code = entity.Code,
+            Name = entity.DisplayName,
+            ImageLink = image // added to CsvEntry: public string ImageLink { get; set; }
+        });
+    }
+}
+```
+
 ## Feed Generation
 
-Populating the feed is handled through a scheduled job and the result is serialized and stored in the database. See job `ProductFeed - Create feeds` in the Optimizely Admin mode.
+Populating the feed is handled through a scheduled job and the result is serialized and stored in the database. See job `ProductFeed - Create feeds` in the Optimizely Settings (Admin) > Scheduled Jobs.
+
+While the job runs, its status shows how many entities have been enriched and how far feed generation has come for each host. The job can be stopped at any time; it stops after the entity it is processing, and feeds it has not regenerated yet keep their previous content.
+
+A feed is generated for every host of every site. Feeds for internationalized domain names (for example `bücher.de`) are served for both the Unicode and the encoded (`xn--bcher-kva.de`) host name.
 
 ## Troubleshooting
 
-If your request to `/googleproductfeed` (or any other path that you configured for the feed) returns 404 with message `No feed generated`, make sure you run the job to populate the feed.
+If your request to `/google-feed` (or any other path that you configured for the feed) returns 404 with message `Feed not found`, make sure you run the job to populate the feed.
+
+If the job fails with `Execution Timeout Expired` while saving a large feed, increase `CommandTimeout` (see [Configuration](#configuration)).
 
 ## 🏁 Getting Started
 
@@ -290,6 +329,8 @@ Ensure your system is properly configured to meet all prerequisites for Geta Fou
    cd ../../src/Geta.Optimizely.ProductFeed.Web
    dotnet run
 ```
+
+The sandbox runs without Optimizely Graph credentials. To use Graph, set `Optimizely:ContentGraph` (`AppKey`, `Secret`, `SingleKey`) in `sub/geta-foundation-core/src/Foundation/appsettings.Development.json`.
 
 If you run into any issues, check the FAQ section [here](https://github.com/Geta/geta-foundation-web?tab=readme-ov-file#faq) 
 

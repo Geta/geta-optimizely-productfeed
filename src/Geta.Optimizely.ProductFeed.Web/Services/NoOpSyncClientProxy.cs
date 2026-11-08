@@ -2,18 +2,21 @@ using System.Reflection;
 
 namespace Geta.Optimizely.ProductFeed.Web.Services;
 
+// Stands in for Optimizely Graph's internal ISyncClient when no Graph credentials are configured.
+// Every call completes immediately with an empty result rather than null, because Graph dereferences the results
+// (responses, streamed results) without null checks.
 internal class NoOpSyncClientProxy : DispatchProxy
 {
+    private static readonly MethodInfo FromResultMethod = typeof(Task).GetMethod(nameof(Task.FromResult))!;
+
+    private static readonly MethodInfo EmptyAsyncMethod =
+        typeof(NoOpSyncClientProxy).GetMethod(nameof(EmptyAsync), BindingFlags.NonPublic | BindingFlags.Static)!;
+
     protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
     {
-        if (targetMethod == null)
-        {
-            return null;
-        }
+        var returnType = targetMethod?.ReturnType;
 
-        var returnType = targetMethod.ReturnType;
-
-        if (returnType == typeof(void))
+        if (returnType == null || returnType == typeof(void))
         {
             return null;
         }
@@ -26,13 +29,33 @@ internal class NoOpSyncClientProxy : DispatchProxy
         if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
         {
             var resultType = returnType.GetGenericArguments()[0];
-            var defaultValue = resultType.IsValueType ? Activator.CreateInstance(resultType) : null;
-            return typeof(Task)
-                .GetMethod(nameof(Task.FromResult))!
-                .MakeGenericMethod(resultType)
-                .Invoke(null, [defaultValue]);
+            return FromResultMethod.MakeGenericMethod(resultType).Invoke(null, [CreateEmpty(resultType)]);
         }
 
-        return returnType.IsValueType ? Activator.CreateInstance(returnType) : null;
+        return CreateEmpty(returnType);
     }
+
+    private static object? CreateEmpty(Type type)
+    {
+        // The only bool results are "exists" checks; answering true stops Graph from (re)building its schema.
+        if (type == typeof(bool))
+        {
+            return true;
+        }
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
+        {
+            return EmptyAsyncMethod.MakeGenericMethod(type.GetGenericArguments()[0]).Invoke(null, null);
+        }
+
+        // Value types get their default; classes with a parameterless constructor (Graph's response types) an empty instance.
+        return type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null ? Activator.CreateInstance(type) : null;
+    }
+
+#pragma warning disable CS1998 // An empty async stream has nothing to await.
+    private static async IAsyncEnumerable<T> EmptyAsync<T>()
+    {
+        yield break;
+    }
+#pragma warning restore CS1998
 }

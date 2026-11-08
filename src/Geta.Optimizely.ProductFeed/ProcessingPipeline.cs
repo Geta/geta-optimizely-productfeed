@@ -10,6 +10,12 @@ using Geta.Optimizely.ProductFeed.Repositories;
 
 namespace Geta.Optimizely.ProductFeed;
 
+// Lets FeedBuilderCreateJob run the pipeline for the entity type chosen at startup without reflection.
+internal interface IProcessingPipeline
+{
+    void Process(JobStatusLogger logger, CancellationToken cancellationToken);
+}
+
 public class ProcessingPipeline<TEntity>(
     ISiteBuilder siteBuilder,
     IProductFeedContentLoader feedContentLoader,
@@ -18,7 +24,7 @@ public class ProcessingPipeline<TEntity>(
     IEnumerable<FeedDescriptor> feedDescriptors,
     Func<FeedDescriptor, AbstractFeedContentExporter<TEntity>> converterFactory,
     IFeedRepository feedRepository,
-    IProductFeedFilter<TEntity> filter = null)
+    IProductFeedFilter<TEntity> filter = null) : IProcessingPipeline
 {
     public void Process(JobStatusLogger logger, CancellationToken cancellationToken)
     {
@@ -35,7 +41,11 @@ public class ProcessingPipeline<TEntity>(
 
             var sourceData = feedContentLoader
                 .LoadSourceData(cancellationToken)
-                .Select(entityMapper.Map)
+                .Select(content =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return entityMapper.Map(content);
+                })
                 .Where(d => d != null)
                 .Where(d => filter?.ShouldInclude(d) ?? true)
                 .ToList();
@@ -48,7 +58,8 @@ public class ProcessingPipeline<TEntity>(
 
                 foreach (var enricher in enrichers)
                 {
-                    enricher.Enrich(sourceData[i], cancellationToken);
+                    // An enricher may return a new instance (e.g. a record updated with 'with'); null keeps the current one.
+                    sourceData[i] = enricher.Enrich(sourceData[i], cancellationToken) ?? sourceData[i];
                 }
 
                 logger.Progress("Enriching entities", i + 1, sourceData.Count);
@@ -56,6 +67,9 @@ public class ProcessingPipeline<TEntity>(
 
             foreach (var host in siteBuilder.GetHosts())
             {
+                var hostUrl = host.Url;
+                var buildActivity = $"Building feeds for {hostUrl}";
+
                 // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
                 // render document start tag or do some other magic
                 foreach (var exporter in exporters)
@@ -72,8 +86,12 @@ public class ProcessingPipeline<TEntity>(
                         exporter.BuildEntry(sourceData[i], host, cancellationToken);
                     }
 
-                    logger.Progress($"Building feeds for {host.Url}", i + 1, sourceData.Count);
+                    logger.Progress(buildActivity, i + 1, sourceData.Count);
                 }
+
+                // Don't replace stored feeds with ones a Stop cut short, e.g. when a loader ends early once cancelled
+                // and there were no entities to check the token for.
+                cancellationToken.ThrowIfCancellationRequested();
 
                 // dispose exporters - so we let them flush and wrap-up
                 foreach (var exporter in exporters)
@@ -81,7 +99,7 @@ public class ProcessingPipeline<TEntity>(
                     feedRepository.Save(exporter.FinishExport(host, cancellationToken));
                 }
 
-                logger.LogWithStatus($"> Generated feeds for {host.Url} host.");
+                logger.LogWithStatus($"> Generated feeds for {hostUrl} host.");
             }
 
             logger.LogWithStatus("Product feed generation completed.");
@@ -93,7 +111,15 @@ public class ProcessingPipeline<TEntity>(
             {
                 if (exporter is IDisposable disposable)
                 {
-                    disposable.Dispose();
+                    // A failing Dispose must not hide the stop or error that ended the export, or skip the other exporters.
+                    try
+                    {
+                        disposable.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Log($"Failed to dispose exporter {exporter.GetType().FullName}. {ex}");
+                    }
                 }
             }
         }

@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Globalization;
 using System.Text;
 
 namespace Geta.Optimizely.ProductFeed;
@@ -9,6 +10,12 @@ namespace Geta.Optimizely.ProductFeed;
 public class JobStatusLogger(Action<string> onStatusChanged)
 {
     private readonly StringBuilder _stringBuilder = new();
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
+
+    internal JobStatusLogger(Action<string> onStatusChanged, TimeProvider timeProvider) : this(onStatusChanged)
+    {
+        _timeProvider = timeProvider;
+    }
 
     public void Log(string message)
     {
@@ -17,7 +24,8 @@ public class JobStatusLogger(Action<string> onStatusChanged)
 
     public void LogWithStatus(string message)
     {
-        message = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} - {message}";
+        // Invariant culture: ':' would otherwise be the culture's time separator, and the year would follow its calendar.
+        message = string.Create(CultureInfo.InvariantCulture, $"{_timeProvider.GetUtcNow():yyyy-MM-dd HH:mm:ss} - {message}");
         Status(message);
         Log(message);
     }

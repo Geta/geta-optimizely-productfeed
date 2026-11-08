@@ -71,6 +71,17 @@ public class FeedRepositoryTests
 
         var stored = Assert.Single(_dbContext.FeedData.AsNoTracking().ToList());
         Assert.Equal("v2", Encoding.UTF8.GetString(stored.FeedBytes));
+        Assert.Equal("https://bücher.de/google-feed", stored.Link);
+    }
+
+    [Fact]
+    public void Save_LinksDifferingOnlyByQuery_AreStoredSeparately()
+    {
+        _repository.Save([Feed("https://example.com/google-feed", "default"), Feed("https://example.com/google-feed?market=se", "se")]);
+
+        Assert.Equal(2, _dbContext.FeedData.AsNoTracking().Count());
+        var feed = _repository.GetLatestFeed(new Uri("https://example.com/google-feed?utm_source=x"));
+        Assert.Equal("default", Encoding.UTF8.GetString(feed!.FeedBytes));
     }
 
     [Fact]
@@ -89,6 +100,16 @@ public class FeedRepositoryTests
         var descriptor = _repository.FindDescriptorByUri(new Uri("https://example.com/Google-Feed?x=1"));
 
         Assert.Equal("google", descriptor?.Name);
+    }
+
+    [Fact]
+    public void FindDescriptorByUri_MatchesPercentEncodedPath()
+    {
+        var repository = new FeedRepository(_dbContext, [new FeedDescriptor("nordic", "/produktflöde", "text/csv")]);
+
+        var descriptor = repository.FindDescriptorByUri(new Uri("https://example.com/produktfl%C3%B6de"));
+
+        Assert.Equal("nordic", descriptor?.Name);
     }
 
     [Fact]

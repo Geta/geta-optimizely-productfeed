@@ -2,6 +2,8 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -33,6 +35,26 @@ public class CsvFeedExporterTests
         });
 
         Assert.Equal(["Code,Name", "A,Image 1", "A,Image 2"], csv);
+    }
+
+    [Fact]
+    public void DynamicRecord_WritesOneRow()
+    {
+        IDictionary<string, object?> record = new ExpandoObject();
+        record["Code"] = "A";
+        record["Name"] = "Shirt";
+
+        var csv = Export(record);
+
+        Assert.Equal(["Code,Name", "A,Shirt"], csv);
+    }
+
+    [Fact]
+    public void DictionaryRecord_WritesOneRow()
+    {
+        var csv = Export(new Dictionary<string, object> { ["Code"] = "A", ["Name"] = "Shirt" });
+
+        Assert.Equal(["Code,Name", "A,Shirt"], csv);
     }
 
     [Fact]
