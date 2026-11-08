@@ -48,9 +48,10 @@ jobs:
           gh release create ${{ github.ref_name }} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Loop through all .nupkg files in the current directory and upload them to the release
+      - name: Upload the packed .nupkg files to the release
         run: |
-          Get-ChildItem -Filter *.nupkg -Recurse | ForEach-Object {
+          # Only the packages packed to the repo root; -Recurse also picked up the Foundation submodule's local NuGet feed.
+          Get-ChildItem -Path . -Filter Geta.Optimizely.ProductFeed*.nupkg | ForEach-Object {
             Write-Host "Uploading file: $($_.Name)"
             gh release upload ${{ github.ref_name }} $_.FullName --clobber
           }
