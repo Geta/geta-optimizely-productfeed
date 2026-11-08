@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed.Google\Geta.Optimizely.ProductFeed.Google.csproj" />
     <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed\Geta.Optimizely.ProductFeed.csproj" />
+    <ProjectReference Include="..\..\src\Geta.Optimizely.ProductFeed.Csv\Geta.Optimizely.ProductFeed.Csv.csproj" />
   </ItemGroup>
 
 </Project>

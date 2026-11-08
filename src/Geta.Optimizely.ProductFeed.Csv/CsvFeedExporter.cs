@@ -31,19 +31,33 @@ public class CsvFeedExporter<TEntity>(CsvFeedDescriptor<TEntity> descriptor) : A
 
     public override byte[] SerializeEntry(object value, CancellationToken cancellationToken)
     {
-        // Handle collections (e.g., IEnumerable<CsvEntry>) by writing all records.
-        // Use non-generic IEnumerable to avoid generic invariance issues.
-        if (value is IEnumerable enumerable && value is not string)
+        // A converter may return a collection (e.g. IEnumerable<CsvEntry>) to write several rows for one entity.
+        // Non-generic IEnumerable avoids generic invariance issues.
+        if (value is IEnumerable records and not string)
         {
-            _writer.WriteRecords(enumerable);
+            foreach (var record in records)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                WriteRecord(record);
+            }
         }
         else
         {
-            _writer.WriteRecord(value);
-            _writer.NextRecord();
+            WriteRecord(value);
         }
 
         return [];
+    }
+
+    private void WriteRecord(object record)
+    {
+        if (record == null)
+        {
+            return;
+        }
+
+        _writer.WriteRecord(record);
+        _writer.NextRecord();
     }
 
     public override ICollection<FeedEntity> FinishExport(HostDefinition host, CancellationToken cancellationToken)
