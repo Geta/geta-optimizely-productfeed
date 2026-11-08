@@ -2,6 +2,7 @@
 // Licensed under Apache-2.0. See the LICENSE file in the project root for more information
 
 using System;
+using System.Reflection;
 using System.Threading;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
@@ -45,8 +46,12 @@ public class FeedBuilderCreateJob : ScheduledJobBase
 
             if (mi != null)
             {
-                mi.Invoke(genericPipeline, [_jobStatusLogger, _cts.Token]);
+                mi.Invoke(genericPipeline, BindingFlags.DoNotWrapExceptions, null, [_jobStatusLogger, _cts.Token], null);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            _jobStatusLogger.LogWithStatus("Job was stopped before feed generation completed.");
         }
         catch (Exception ex)
         {

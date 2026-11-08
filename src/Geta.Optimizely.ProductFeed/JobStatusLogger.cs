@@ -17,7 +17,7 @@ public class JobStatusLogger(Action<string> onStatusChanged)
 
     public void LogWithStatus(string message)
     {
-        message = $"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} - {message}";
+        message = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} - {message}";
         Status(message);
         Log(message);
     }
@@ -25,6 +25,23 @@ public class JobStatusLogger(Action<string> onStatusChanged)
     public void Status(string message)
     {
         onStatusChanged?.Invoke(message);
+    }
+
+    // Updates the job status (not the job log) roughly every 5% of the work, and when the work is done.
+    public void Progress(string activity, int processed, int total)
+    {
+        if (total <= 0)
+        {
+            return;
+        }
+
+        var step = Math.Max(1, total / 20);
+        if (processed % step != 0 && processed != total)
+        {
+            return;
+        }
+
+        Status($"{activity}: {processed} of {total} ({processed * 100L / total}%)");
     }
 
     public string ToString(string separator = "<br />")

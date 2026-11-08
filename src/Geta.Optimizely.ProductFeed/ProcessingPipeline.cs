@@ -29,57 +29,73 @@ public class ProcessingPipeline<TEntity>(
             .Select(converterFactory)
             .ToList();
 
-        var sourceData = feedContentLoader
-            .LoadSourceData(cancellationToken)
-            .Select(entityMapper.Map)
-            .Where(d => filter?.ShouldInclude(d) ?? true)
-            .Where(d => d != null)
-            .Select(d =>
+        try
+        {
+            logger.LogWithStatus("Loading catalog content...");
+
+            var sourceData = feedContentLoader
+                .LoadSourceData(cancellationToken)
+                .Select(entityMapper.Map)
+                .Where(d => d != null)
+                .Where(d => filter?.ShouldInclude(d) ?? true)
+                .ToList();
+
+            logger.LogWithStatus($"Loaded {sourceData.Count} entities.");
+
+            for (var i = 0; i < sourceData.Count; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (var enricher in enrichers)
                 {
-                    enricher.Enrich(d, cancellationToken);
+                    enricher.Enrich(sourceData[i], cancellationToken);
                 }
 
-                return d;
-            })
-            .ToList();
-
-        foreach (var host in siteBuilder.GetHosts())
-        {
-            // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
-            // render document start tag or do some other magic
-            foreach (var exporter in exporters)
-            {
-                exporter.BeginExport(host, cancellationToken);
+                logger.Progress("Enriching entities", i + 1, sourceData.Count);
             }
 
-            foreach (var d in sourceData)
+            foreach (var host in siteBuilder.GetHosts())
             {
+                // begin exporting pipeline - this is good moment for some of the exporters to prepare file headers
+                // render document start tag or do some other magic
                 foreach (var exporter in exporters)
                 {
-                    exporter.BuildEntry(d, host, cancellationToken);
+                    exporter.BeginExport(host, cancellationToken);
                 }
+
+                for (var i = 0; i < sourceData.Count; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    foreach (var exporter in exporters)
+                    {
+                        exporter.BuildEntry(sourceData[i], host, cancellationToken);
+                    }
+
+                    logger.Progress($"Building feeds for {host.Url}", i + 1, sourceData.Count);
+                }
+
+                // dispose exporters - so we let them flush and wrap-up
+                foreach (var exporter in exporters)
+                {
+                    feedRepository.Save(exporter.FinishExport(host, cancellationToken));
+                }
+
+                logger.LogWithStatus($"> Generated feeds for {host.Url} host.");
             }
 
-            // dispose exporters - so we let them flush and wrap-up
+            logger.LogWithStatus("Product feed generation completed.");
+        }
+        finally
+        {
+            // let it go! let it go!
             foreach (var exporter in exporters)
             {
-                feedRepository.Save(exporter.FinishExport(host, cancellationToken));
-            }
-
-            logger.LogWithStatus($"> Generated feeds for {host.Url} host.");
-        }
-
-        // let it go! let it go!
-        foreach (var exporter in exporters)
-        {
-            if (exporter is IDisposable disposable)
-            {
-                disposable.Dispose();
+                if (exporter is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
         }
-
-        logger.LogWithStatus("Product feed generation completed.");
     }
 }

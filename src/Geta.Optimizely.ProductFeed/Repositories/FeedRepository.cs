@@ -17,18 +17,11 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
 {
     public FeedEntity GetLatestFeed(Uri siteUri)
     {
-        if (siteUri == null)
-        {
-            throw new ArgumentNullException(nameof(siteUri));
-        }
+        ArgumentNullException.ThrowIfNull(siteUri);
 
-        // we need to do client-side eval because string.Equals with comparison is not supported
-        var feedContent = applicationDbContext
-            .FeedData
-            .ToList();
+        var id = MatchFeedId(QueryFeedLinks().ToList(), FeedLink.Normalize(siteUri));
 
-        return feedContent.FirstOrDefault(f => f.Link.Equals(GetAbsoluteUrlWithoutQuery(siteUri).AbsoluteUri.TrimEnd('/'),
-                                                             StringComparison.InvariantCultureIgnoreCase));
+        return id == null ? null : applicationDbContext.FeedData.AsNoTracking().FirstOrDefault(f => f.Id == id);
     }
 
     public void Save(ICollection<FeedEntity> feedData)
@@ -38,12 +31,13 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
             return;
         }
 
-        var feeds = applicationDbContext.FeedData.ToList();
-
         foreach (var data in feedData)
         {
-            PrepareFeedData(feeds, data);
+            var id = MatchFeedId(QueryFeedLinks().ToList(), FeedLink.Normalize(data.Link));
+            Upsert(id == null ? null : applicationDbContext.FeedData.Find(id), data);
+
             applicationDbContext.SaveChanges();
+            applicationDbContext.ChangeTracker.Clear();
         }
     }
 
@@ -54,29 +48,44 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
             return;
         }
 
-        var feeds = await applicationDbContext.FeedData.ToListAsync(cancellationToken);
         foreach (var data in feedData)
         {
-            PrepareFeedData(feeds, data);
+            var id = MatchFeedId(await QueryFeedLinks().ToListAsync(cancellationToken), FeedLink.Normalize(data.Link));
+            Upsert(id == null ? null : await applicationDbContext.FeedData.FindAsync([id], cancellationToken), data);
+
             await applicationDbContext.SaveChangesAsync(cancellationToken);
+            applicationDbContext.ChangeTracker.Clear();
         }
     }
 
     public FeedDescriptor FindDescriptorByUri(Uri siteUri)
     {
-        var path = GetAbsoluteUrlWithoutQuery(siteUri).AbsolutePath.Trim('/');
+        var path = siteUri.AbsolutePath.Trim('/');
 
         return descriptors.FirstOrDefault(d => d.FileName.Trim('/').Equals(path, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private void PrepareFeedData(List<FeedEntity> feeds, FeedEntity data)
+    // Only Id and Link are loaded: links are matched client-side (IDN host normalization), and loading
+    // FeedBytes for every stored feed would pull the content of all feeds into memory on each lookup.
+    private IQueryable<FeedLinkRow> QueryFeedLinks()
     {
-        var found = feeds.FirstOrDefault(f => f.Link.Equals(data.Link, StringComparison.InvariantCultureIgnoreCase));
+        return applicationDbContext.FeedData
+            .AsNoTracking()
+            .OrderByDescending(f => f.CreatedUtc)
+            .Select(f => new FeedLinkRow(f.Id, f.Link));
+    }
 
-        if (found != null)
+    private static int? MatchFeedId(IEnumerable<FeedLinkRow> feeds, string normalizedLink)
+    {
+        return feeds.FirstOrDefault(f => FeedLink.AreEqual(f.Link, normalizedLink))?.Id;
+    }
+
+    private void Upsert(FeedEntity existing, FeedEntity data)
+    {
+        if (existing != null)
         {
-            found.CreatedUtc = DateTime.UtcNow;
-            found.FeedBytes = data.FeedBytes;
+            existing.CreatedUtc = DateTime.UtcNow;
+            existing.FeedBytes = data.FeedBytes;
         }
         else
         {
@@ -85,8 +94,5 @@ public class FeedRepository(FeedApplicationDbContext applicationDbContext, IEnum
         }
     }
 
-    private Uri GetAbsoluteUrlWithoutQuery(Uri siteUri)
-    {
-        return new UriBuilder(siteUri) { Query = string.Empty }.Uri;
-    }
+    private sealed record FeedLinkRow(int Id, string Link);
 }
