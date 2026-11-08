@@ -1,4 +1,7 @@
+using System.Reflection;
 using EPiServer.Web.Routing;
+using Geta.Optimizely.ProductFeed.Web.Services;
+using Optimizely.Graph.Cms.Configuration;
 using Geta.Optimizely.ProductFeed.Configuration;
 using Geta.Optimizely.ProductFeed.Csv;
 using Geta.Optimizely.ProductFeed.Google;
@@ -24,6 +27,8 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         _foundationStartup.ConfigureServices(services);
+        UseNoOpGraphSyncClientWhenUnconfigured(services);
+
         services
             .AddProductFeed<MyCommerceProductRecord>(options =>
             {
@@ -51,6 +56,41 @@ public class Startup
                     d.CsvEntityType = typeof(CsvEntry);
                 });
             });
+    }
+
+    // When no ContentGraph AppKey is configured (the sandbox default), replace the Graph sync client
+    // with a no-op so startup doesn't fail on Graph schema initialization.
+    private void UseNoOpGraphSyncClientWhenUnconfigured(IServiceCollection services)
+    {
+        if (!string.IsNullOrEmpty(_configuration["Optimizely:ContentGraph:AppKey"]))
+        {
+            return;
+        }
+
+        var syncClientType = typeof(GraphCmsOptions).Assembly.GetType("Optimizely.Graph.Cms.Client.ISyncClient");
+        if (syncClientType == null)
+        {
+            return;
+        }
+
+        var descriptor = services.FirstOrDefault(d => d.ServiceType == syncClientType);
+        if (descriptor != null)
+        {
+            services.Remove(descriptor);
+        }
+
+        // .NET 10 added overloads to DispatchProxy.Create, so GetMethod(name) is ambiguous.
+        // Select the parameterless generic Create<T, TProxy>() explicitly.
+        var createMethod = typeof(DispatchProxy).GetMethods()
+            .Single(m => m.Name == nameof(DispatchProxy.Create)
+                         && m.IsGenericMethodDefinition
+                         && m.GetGenericArguments().Length == 2
+                         && m.GetParameters().Length == 0);
+        var proxy = createMethod
+            .MakeGenericMethod(syncClientType, typeof(NoOpSyncClientProxy))
+            .Invoke(null, null)!;
+
+        services.AddSingleton(syncClientType, proxy);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
